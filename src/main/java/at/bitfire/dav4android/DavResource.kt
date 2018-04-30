@@ -50,7 +50,7 @@ open class DavResource @JvmOverloads constructor(
     /** WebDAV properties of this resource */
     val properties = PropertyCollection()
 
-    /** whether a 507 Insufficient Storage was found in the response */
+    /** whether a 507 Insufficient Storage was found in the previous response */
     var furtherResults = false
 
     /** members of this resource */
@@ -94,6 +94,7 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class, DavException::class)
     fun options() {
+        resetResponse()
         capabilities.clear()
 
         val request = Request.Builder()
@@ -161,6 +162,8 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class)
     fun mkCol(xmlBody: String?) {
+        resetResponse()
+
         val rqBody = if (xmlBody != null) RequestBody.create(MIME_XML, xmlBody) else null
 
         var response: Response? = null
@@ -197,6 +200,8 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class, DavException::class)
     fun get(accept: String): ResponseBody {
+        resetResponse()
+
         var response: Response? = null
         for (attempt in 1..MAX_REDIRECTS) {
             val request = Request.Builder()
@@ -248,6 +253,8 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class)
     fun put(body: RequestBody, ifMatchETag: String?, ifNoneMatch: Boolean): Boolean {
+        resetResponse()
+
         var redirected = false
         var response: Response? = null
         for (attempt in 1..MAX_REDIRECTS) {
@@ -298,6 +305,8 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class)
     fun delete(ifMatchETag: String?) {
+        resetResponse()
+
         var response: Response? = null
         for (attempt in 1..MAX_REDIRECTS) {
             val builder = Request.Builder()
@@ -345,6 +354,8 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class, DavException::class)
     fun propfind(depth: Int, vararg reqProp: Property.Name) {
+        resetResponse()
+
         // build XML request body
         val serializer = XmlUtils.newSerializer()
         val writer = StringWriter()
@@ -683,7 +694,8 @@ open class DavResource @JvmOverloads constructor(
             }
 
             // set properties for target
-            target.furtherResults = insufficientStorage
+            if (insufficientStorage)
+                target.furtherResults = true
             target.properties.merge(properties, true)
         }
 
@@ -705,6 +717,7 @@ open class DavResource @JvmOverloads constructor(
             }
         }
 
+        resetResponse()
         try {
             parser.setInput(reader)
 
