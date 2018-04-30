@@ -29,6 +29,8 @@ class PropertyCollection {
     /**
      * Returns a WebDAV property, or null if this property is not known.
      */
+
+    @Suppress("UNCHECKED_CAST")
     operator fun<T: Property> get(clazz: Class<T>): T? {
         if (!properties.isInitialized())
             return null
