@@ -44,7 +44,7 @@ class PropertyCollection {
         }
     }
 
-    private fun getMap(): Map<Property.Name, Property?> =
+    fun getMap(): Map<Property.Name, Property?> =
             if (!properties.isInitialized())
                 mapOf()
             else
