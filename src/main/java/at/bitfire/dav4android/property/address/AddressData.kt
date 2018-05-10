@@ -6,26 +6,30 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
-package at.bitfire.dav4android.property
+package at.bitfire.dav4android.property.address
 
 import at.bitfire.dav4android.Property
+import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-class AddressbookHomeSet: HrefListProperty() {
+data class AddressData(
+        val vCard: String?
+): Property {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "addressbook-home-set")
+        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "address-data")
     }
 
 
-    class Factory : HrefListProperty.Factory() {
+    class Factory: PropertyFactory {
 
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                create(parser, AddressbookHomeSet())
+                // <!ELEMENT address-data (#PCDATA)>
+                AddressData(XmlUtils.readText(parser))
 
     }
 

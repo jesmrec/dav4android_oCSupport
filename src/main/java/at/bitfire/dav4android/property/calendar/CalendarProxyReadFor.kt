@@ -6,29 +6,27 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
-package at.bitfire.dav4android.property
+package at.bitfire.dav4android.property.calendar
 
 import at.bitfire.dav4android.Property
-import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
+import at.bitfire.dav4android.property.HrefListProperty
 import org.xmlpull.v1.XmlPullParser
 
-data class AddressbookDescription(
-        var description: String? = null
-): Property {
+class CalendarProxyReadFor: HrefListProperty() {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "addressbook-description")
+        val NAME = Property.Name(XmlUtils.NS_CALENDARSERVER, "calendar-proxy-read-for")
     }
 
-    class Factory: PropertyFactory {
+
+    class Factory : HrefListProperty.Factory() {
 
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                // <!ELEMENT addressbook-description (#PCDATA)>
-                AddressbookDescription(XmlUtils.readText(parser))
+                create(parser, CalendarProxyReadFor())
 
     }
 

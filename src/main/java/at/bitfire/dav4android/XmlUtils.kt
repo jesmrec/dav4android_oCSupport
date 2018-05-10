@@ -20,6 +20,8 @@ object XmlUtils {
     const val NS_CARDDAV = "urn:ietf:params:xml:ns:carddav"
     const val NS_APPLE_ICAL = "http://apple.com/ns/ical/"
     const val NS_CALENDARSERVER = "http://calendarserver.org/ns/"
+    const val NS_SABREDAV = "http://sabredav.org/ns"
+    const val NS_OWNCLOUD = "http://owncloud.org/ns"
 
     private val factory: XmlPullParserFactory
     init {

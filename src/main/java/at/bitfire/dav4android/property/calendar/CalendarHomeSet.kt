@@ -6,17 +6,18 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
-package at.bitfire.dav4android.property
+package at.bitfire.dav4android.property.calendar
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.XmlUtils
+import at.bitfire.dav4android.property.HrefListProperty
 import org.xmlpull.v1.XmlPullParser
 
-class CalendarProxyWriteFor: HrefListProperty() {
+class CalendarHomeSet: HrefListProperty() {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALENDARSERVER, "calendar-proxy-write-for")
+        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-home-set")
     }
 
 
@@ -25,7 +26,7 @@ class CalendarProxyWriteFor: HrefListProperty() {
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                create(parser, CalendarProxyWriteFor())
+                create(parser, CalendarHomeSet())
 
     }
 

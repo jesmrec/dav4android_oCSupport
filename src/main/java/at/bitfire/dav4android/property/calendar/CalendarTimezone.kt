@@ -6,20 +6,20 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
-package at.bitfire.dav4android.property
+package at.bitfire.dav4android.property.calendar
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-data class CalendarData(
-        val iCalendar: String?
+data class CalendarTimezone(
+        val vTimeZone: String?
 ): Property {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-data")
+        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-timezone")
     }
 
 
@@ -28,9 +28,8 @@ data class CalendarData(
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                // <!ELEMENT calendar-data (#PCDATA)>
-                CalendarData(XmlUtils.readText(parser))
+                // <!ELEMENT calendar-timezone (#PCDATA)>
+                CalendarTimezone(XmlUtils.readText(parser))
 
     }
-
 }

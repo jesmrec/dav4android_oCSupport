@@ -6,30 +6,30 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
-package at.bitfire.dav4android.property
+package at.bitfire.dav4android.property.address
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-data class CalendarTimezone(
-        val vTimeZone: String?
+data class AddressbookDescription(
+        var description: String? = null
 ): Property {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-timezone")
+        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "addressbook-description")
     }
-
 
     class Factory: PropertyFactory {
 
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                // <!ELEMENT calendar-timezone (#PCDATA)>
-                CalendarTimezone(XmlUtils.readText(parser))
+                // <!ELEMENT addressbook-description (#PCDATA)>
+                AddressbookDescription(XmlUtils.readText(parser))
 
     }
+
 }

@@ -6,20 +6,20 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
-package at.bitfire.dav4android.property
+package at.bitfire.dav4android.property.calendar
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-data class AddressData(
-        val vCard: String?
+data class CalendarDescription(
+        val description: String?
 ): Property {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "address-data")
+        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-description")
     }
 
 
@@ -28,8 +28,8 @@ data class AddressData(
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                // <!ELEMENT address-data (#PCDATA)>
-                AddressData(XmlUtils.readText(parser))
+                // <!ELEMENT calendar-description (#PCDATA)>
+                CalendarDescription(XmlUtils.readText(parser))
 
     }
 

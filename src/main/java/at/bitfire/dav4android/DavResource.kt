@@ -255,15 +255,17 @@ open class DavResource @JvmOverloads constructor(
         serializer.setPrefix("", XmlUtils.NS_WEBDAV)
         serializer.setPrefix("CAL", XmlUtils.NS_CALDAV)
         serializer.setPrefix("CARD", XmlUtils.NS_CARDDAV)
+        serializer.setPrefix("SABRE", XmlUtils.NS_SABREDAV)
+        serializer.setPrefix("OC", XmlUtils.NS_OWNCLOUD)
         serializer.startDocument("UTF-8", null)
         serializer.setPrefix("", XmlUtils.NS_WEBDAV)
         serializer.startTag(XmlUtils.NS_WEBDAV, "propfind")
-        serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
-        for (prop in reqProp) {
-            serializer.startTag(prop.namespace, prop.name)
-            serializer.endTag(prop.namespace, prop.name)
-        }
-        serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
+            serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
+                for (prop in reqProp) {
+                    serializer.startTag(prop.namespace, prop.name)
+                    serializer.endTag(prop.namespace, prop.name)
+                }
+            serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
         serializer.endTag(XmlUtils.NS_WEBDAV, "propfind")
         serializer.endDocument()
 
