@@ -299,12 +299,12 @@ open class DavResource @JvmOverloads constructor(
         serializer.setPrefix("OC", XmlUtils.NS_OWNCLOUD)
         serializer.startDocument("UTF-8", null)
         serializer.startTag(XmlUtils.NS_WEBDAV, "propfind")
-        serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
-        for (prop in reqProp) {
-            serializer.startTag(prop.namespace, prop.name)
-            serializer.endTag(prop.namespace, prop.name)
-        }
-        serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
+            serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
+                for (prop in reqProp) {
+                    serializer.startTag(prop.namespace, prop.name)
+                    serializer.endTag(prop.namespace, prop.name)
+                }
+            serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
         serializer.endTag(XmlUtils.NS_WEBDAV, "propfind")
         serializer.endDocument()
         followRedirects {
