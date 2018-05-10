@@ -4,17 +4,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package at.bitfire.dav4android.property
+package at.bitfire.dav4android.property.address
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.XmlUtils
+import at.bitfire.dav4android.property.HrefListProperty
 import org.xmlpull.v1.XmlPullParser
 
-class CalendarProxyWriteFor: HrefListProperty() {
+class AddressbookHomeSet: HrefListProperty() {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALENDARSERVER, "calendar-proxy-write-for")
+        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "addressbook-home-set")
     }
 
 
@@ -23,7 +24,7 @@ class CalendarProxyWriteFor: HrefListProperty() {
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                create(parser, CalendarProxyWriteFor())
+                create(parser, AddressbookHomeSet())
 
     }
 
