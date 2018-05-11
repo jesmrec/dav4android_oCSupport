@@ -1,23 +1,23 @@
-package at.bitfire.dav4android.property.owncloud
+package at.bitfire.dav4android.property
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-data class OCId(
-        val id: String
+data class GetContentLength(
+        val contentLength: Long
 ) : Property {
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "id")
+        val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "getcontentlength")
 
         class Factory : PropertyFactory {
             override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): OCId? {
+            override fun create(parser: XmlPullParser): GetContentLength? {
                 XmlUtils.readText(parser)?.let {
-                    return OCId(it)
+                    return GetContentLength(it.toLong())
                 }
                 return null
             }
