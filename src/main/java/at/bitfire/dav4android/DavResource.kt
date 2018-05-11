@@ -85,6 +85,22 @@ open class DavResource @JvmOverloads constructor(
         }
     }
 
+    @Throws(IOException::class, HttpException::class, DavException::class)
+    fun move(destination:String, forceOverride:Boolean) {
+        val requestBuilder = Request.Builder()
+                .method("MOVE", null)
+                .header("Content-Length", "0")
+                .header("Destination", destination);
+        if(forceOverride)
+            requestBuilder.header("Overwrite", "F")
+        requestBuilder.url(location)
+
+        val response = httpClient.newCall(requestBuilder.build()).execute();
+
+        checkStatus(response, true)
+    }
+
+
     /**
      * Sends a MKCOL request to this resource. Follows up to [MAX_REDIRECTS] redirects.
      *
