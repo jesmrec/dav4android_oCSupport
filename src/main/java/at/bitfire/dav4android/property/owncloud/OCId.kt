@@ -13,7 +13,7 @@ class OCId (
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "id")
 
         class Factory: PropertyFactory {
-            override fun getName() = OCPermissions.NAME
+            override fun getName() = NAME
 
             override fun create(parser: XmlPullParser) : OCId? {
                 XmlUtils.readText(parser)?.let {
@@ -23,4 +23,5 @@ class OCId (
             }
         }
     }
+
 }

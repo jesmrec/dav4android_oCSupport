@@ -14,7 +14,7 @@ class OCPrivatelink (
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "privatelink")
 
         class Factory: PropertyFactory {
-            override fun getName() = OCPermissions.NAME
+            override fun getName() = NAME
 
             override fun create(parser: XmlPullParser) : OCPrivatelink? {
                 XmlUtils.readText(parser)?.let {
