@@ -13,7 +13,7 @@ class OCSize (
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "size")
 
         class Factory: PropertyFactory {
-            override fun getName() = OCPermissions.NAME
+            override fun getName() = NAME
 
             override fun create(parser: XmlPullParser) : OCSize? {
                 XmlUtils.readText(parser)?.let {
