@@ -5,18 +5,17 @@ import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-
-class OCPrivatelink (
-        link : String
-): Property {
+data class OCPrivatelink(
+        val link: String
+) : Property {
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "privatelink")
 
-        class Factory: PropertyFactory {
+        class Factory : PropertyFactory {
             override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser) : OCPrivatelink? {
+            override fun create(parser: XmlPullParser): OCPrivatelink? {
                 XmlUtils.readText(parser)?.let {
                     return OCPrivatelink(it)
                 }

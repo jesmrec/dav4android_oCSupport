@@ -5,17 +5,17 @@ import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-class OCSize (
-        size : Long
-): Property {
+data class OCSize(
+        val size: Long
+) : Property {
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "size")
 
-        class Factory: PropertyFactory {
+        class Factory : PropertyFactory {
             override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser) : OCSize? {
+            override fun create(parser: XmlPullParser): OCSize? {
                 XmlUtils.readText(parser)?.let {
                     return OCSize(it.toLong())
                 }
