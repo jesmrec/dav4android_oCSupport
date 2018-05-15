@@ -9,7 +9,6 @@
 package at.bitfire.dav4android
 
 import at.bitfire.dav4android.property.GetETag
-import at.bitfire.dav4android.property.SyncToken
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -35,6 +34,86 @@ class DavCollectionTest {
     fun stopServer() = mockServer.shutdown()
 
 
+<<<<<<< HEAD
+=======
+        mockServer.enqueue(MockResponse()
+                .setResponseCode(207)
+                .setHeader("Content-Type", "text/xml; charset=\"utf-8\"")
+                .setBody("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n" +
+                        "   <D:multistatus xmlns:D=\"DAV:\">\n" +
+                        "     <D:response>\n" +
+                        "       <D:href\n" +
+                        "   >${sampleUrl()}test.doc</D:href>\n" +
+                        "       <D:propstat>\n" +
+                        "         <D:prop>\n" +
+                        "           <D:getetag>\"00001-abcd1\"</D:getetag>\n" +
+                        "           <R:bigbox xmlns:R=\"urn:ns.example.com:boxschema\">\n" +
+                        "             <R:BoxType>Box type A</R:BoxType>\n" +
+                        "           </R:bigbox>\n" +
+                        "         </D:prop>\n" +
+                        "         <D:status>HTTP/1.1 200 OK</D:status>\n" +
+                        "       </D:propstat>\n" +
+                        "     </D:response>\n" +
+                        "     <D:response>\n" +
+                        "       <D:href\n" +
+                        "   >${sampleUrl()}vcard.vcf</D:href>\n" +
+                        "       <D:propstat>\n" +
+                        "         <D:prop>\n" +
+                        "           <D:getetag>\"00002-abcd1\"</D:getetag>\n" +
+                        "         </D:prop>\n" +
+                        "         <D:status>HTTP/1.1 200 OK</D:status>\n" +
+                        "       </D:propstat>\n" +
+                        "       <D:propstat>\n" +
+                        "         <D:prop>\n" +
+                        "           <R:bigbox xmlns:R=\"urn:ns.example.com:boxschema\"/>\n" +
+                        "         </D:prop>\n" +
+                        "         <D:status>HTTP/1.1 404 Not Found</D:status>\n" +
+                        "       </D:propstat>\n" +
+                        "     </D:response>\n" +
+                        "     <D:response>\n" +
+                        "       <D:href\n" +
+                        "   >${sampleUrl()}calendar.ics</D:href>\n" +
+                        "       <D:propstat>\n" +
+                        "         <D:prop>\n" +
+                        "           <D:getetag>\"00003-abcd1\"</D:getetag>\n" +
+                        "         </D:prop>\n" +
+                        "         <D:status>HTTP/1.1 200 OK</D:status>\n" +
+                        "       </D:propstat>\n" +
+                        "       <D:propstat>\n" +
+                        "         <D:prop>\n" +
+                        "           <R:bigbox xmlns:R=\"urn:ns.example.com:boxschema\"/>\n" +
+                        "         </D:prop>\n" +
+                        "         <D:status>HTTP/1.1 404 Not Found</D:status>\n" +
+                        "       </D:propstat>\n" +
+                        "     </D:response>\n" +
+                        "     <D:sync-token>http://example.com/ns/sync/1234</D:sync-token>\n" +
+                        "   </D:multistatus>")
+        )
+        val changes = collection.reportChanges(null, false, null, GetETag.NAME)
+
+        assertEquals(3, changes.members.size)
+        val members = changes.members.iterator()
+        val member1 = members.next()
+        assertEquals(sampleUrl().newBuilder().addPathSegment("test.doc").build(), member1.url)
+        assertEquals("00001-abcd1", member1[GetETag::class.java]!!.eTag)
+
+        val member2 = members.next()
+        assertEquals(sampleUrl().newBuilder().addPathSegment("vcard.vcf").build(), member2.url)
+        assertEquals("00002-abcd1", member2[GetETag::class.java]!!.eTag)
+
+        val member3 = members.next()
+        assertEquals(sampleUrl().newBuilder().addPathSegment("calendar.ics").build(), member3.url)
+        assertEquals("00003-abcd1", member3[GetETag::class.java]!!.eTag)
+
+        assertEquals(0, changes.removedMembers.size)
+        assertFalse(changes.furtherResults)
+        assertEquals("http://example.com/ns/sync/1234", changes.syncToken!!.token)
+    }
+
+    /**
+     * Test sample response for an initial sync-collection report with truncation from RFC 6578 3.10.
+     */
+>>>>>>> Make WebDAV multistatus response objects immutable
     @Test
     fun testSyncCollectionReport() {
         val url = sampleUrl()
@@ -75,24 +154,24 @@ class DavCollectionTest {
                         "     <D:sync-token>http://example.com/ns/sync/1233</D:sync-token>\n" +
                         "   </D:multistatus>")
         )
-        collection.reportChanges(null, false, null, GetETag.NAME)
+        val changes = collection.reportChanges(null, false, null, GetETag.NAME)
 
-        assertEquals(2, collection.members.size)
-        val members = collection.members.iterator()
+        assertEquals(2, changes.members.size)
+        val members = changes.members.iterator()
         val member1 = members.next()
-        assertEquals(sampleUrl().newBuilder().addPathSegment("test.doc").build(), member1.location)
-        assertEquals("00001-abcd1", member1.properties[GetETag::class.java]!!.eTag)
+        assertEquals(sampleUrl().newBuilder().addPathSegment("test.doc").build(), member1.url)
+        assertEquals("00001-abcd1", member1[GetETag::class.java]!!.eTag)
 
         val member2 = members.next()
-        assertEquals(sampleUrl().newBuilder().addPathSegment("vcard.vcf").build(), member2.location)
-        assertEquals("00002-abcd1", member2.properties[GetETag::class.java]!!.eTag)
+        assertEquals(sampleUrl().newBuilder().addPathSegment("vcard.vcf").build(), member2.url)
+        assertEquals("00002-abcd1", member2[GetETag::class.java]!!.eTag)
 
-        assertEquals(1, collection.removedMembers.size)
-        val removedMember = collection.removedMembers.first()
-        assertEquals(sampleUrl().newBuilder().addPathSegment("removed.txt").build(), removedMember.location)
+        assertEquals(1, changes.removedMembers.size)
+        val removedMember = changes.removedMembers.first()
+        assertEquals(sampleUrl().newBuilder().addPathSegment("removed.txt").build(), removedMember.url)
 
-        assertTrue(collection.furtherResults)
-        assertEquals("http://example.com/ns/sync/1233", collection.properties[SyncToken::class.java]!!.token)
+        assertTrue(changes.furtherResults)
+        assertEquals("http://example.com/ns/sync/1233", changes.syncToken!!.token)
     }
 
 }

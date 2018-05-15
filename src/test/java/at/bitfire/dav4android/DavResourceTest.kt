@@ -330,11 +330,11 @@ class DavResourceTest {
                 .setResponseCode(207)
                 .setHeader("Content-Type", "application/xml; charset=utf-8")
                 .setBody("<multistatus xmlns='DAV:'>" +
-                         "  <response>" +
-                         "    <href>/dav</href>" +
-                         "    <status>Invalid Status Line</status>" +
-                         "  </response>" +
-                         "</multistatus>"))
+                        "  <response>" +
+                        "    <href>/dav</href>" +
+                        "    <status>Invalid Status Line</status>" +
+                        "  </response>" +
+                        "</multistatus>"))
         called = false
         dav.propfind(0, ResourceType.NAME) { response, relation ->
             assertEquals(Response.HrefRelation.SELF, relation)
@@ -348,11 +348,11 @@ class DavResourceTest {
                 .setResponseCode(207)
                 .setHeader("Content-Type", "application/xml; charset=utf-8")
                 .setBody("<multistatus xmlns='DAV:'>" +
-                         "  <response>" +
-                         "    <href>/dav</href>" +
-                         "    <status>HTTP/1.1 403 Forbidden</status>" +
-                         "  </response>" +
-                         "</multistatus>"))
+                        "  <response>" +
+                        "    <href>/dav</href>" +
+                        "    <status>HTTP/1.1 403 Forbidden</status>" +
+                        "  </response>" +
+                        "</multistatus>"))
         called = false
         dav.propfind(0, ResourceType.NAME) { response, relation ->
             assertEquals(Response.HrefRelation.SELF, relation)
@@ -420,17 +420,17 @@ class DavResourceTest {
                 .setResponseCode(207)
                 .setHeader("Content-Type", "application/xml; charset=utf-8")
                 .setBody("<multistatus xmlns='DAV:'>" +
-                         "  <response>" +
-                         "    <href>/dav</href>" +
-                         "    <propstat>" +
-                         "      <prop>" +
+                        "  <response>" +
+                        "    <href>/dav</href>" +
+                        "    <propstat>" +
+                        "      <prop>" +
                         "         <resourcetype></resourcetype>" +
-                         "        <displayname>My DAV Collection</displayname>" +
-                         "      </prop>" +
-                         "      <status>HTTP/1.1 200 OK</status>" +
-                         "    </propstat>" +
-                         "  </response>" +
-                         "</multistatus>"))
+                        "        <displayname>My DAV Collection</displayname>" +
+                        "      </prop>" +
+                        "      <status>HTTP/1.1 200 OK</status>" +
+                        "    </propstat>" +
+                        "  </response>" +
+                        "</multistatus>"))
         called = false
         dav.propfind(0, ResourceType.NAME, DisplayName.NAME) { response, relation ->
             called = true
@@ -599,5 +599,4 @@ class DavResourceTest {
         }
         assertTrue(called)
     }
-
 }

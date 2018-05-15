@@ -58,25 +58,25 @@ open class DavCollection @JvmOverloads constructor(
         serializer.startDocument("UTF-8", null)
         serializer.setPrefix("", XmlUtils.NS_WEBDAV)
         serializer.startTag(XmlUtils.NS_WEBDAV, "sync-collection")
-            serializer.startTag(SyncToken.NAME.namespace, SyncToken.NAME.name)
-                syncToken?.let { serializer.text(it) }
-            serializer.endTag(SyncToken.NAME.namespace, SyncToken.NAME.name)
-            serializer.startTag(XmlUtils.NS_WEBDAV, "sync-level")
-                serializer.text(if (infiniteDepth) "infinite" else "1")
-            serializer.endTag(XmlUtils.NS_WEBDAV, "sync-level")
-            limit?.let { nresults ->
-                serializer.startTag(XmlUtils.NS_WEBDAV, "limit")
-                    serializer.startTag(XmlUtils.NS_WEBDAV, "nresults")
-                    serializer.text(nresults.toString())
-                    serializer.endTag(XmlUtils.NS_WEBDAV, "nresults")
-                serializer.endTag(XmlUtils.NS_WEBDAV, "limit")
-            }
-            serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
-            properties.forEach {
-                serializer.startTag(it.namespace, it.name)
-                serializer.endTag(it.namespace, it.name)
-            }
-            serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
+        serializer.startTag(SyncToken.NAME.namespace, SyncToken.NAME.name)
+        syncToken?.let { serializer.text(it) }
+        serializer.endTag(SyncToken.NAME.namespace, SyncToken.NAME.name)
+        serializer.startTag(XmlUtils.NS_WEBDAV, "sync-level")
+        serializer.text(if (infiniteDepth) "infinite" else "1")
+        serializer.endTag(XmlUtils.NS_WEBDAV, "sync-level")
+        limit?.let { nresults ->
+            serializer.startTag(XmlUtils.NS_WEBDAV, "limit")
+            serializer.startTag(XmlUtils.NS_WEBDAV, "nresults")
+            serializer.text(nresults.toString())
+            serializer.endTag(XmlUtils.NS_WEBDAV, "nresults")
+            serializer.endTag(XmlUtils.NS_WEBDAV, "limit")
+        }
+        serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
+        properties.forEach {
+            serializer.startTag(it.namespace, it.name)
+            serializer.endTag(it.namespace, it.name)
+        }
+        serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
         serializer.endTag(XmlUtils.NS_WEBDAV, "sync-collection")
         serializer.endDocument()
 
@@ -90,5 +90,4 @@ open class DavCollection @JvmOverloads constructor(
             return processMultiStatus(it, callback)
         }
     }
-
 }
