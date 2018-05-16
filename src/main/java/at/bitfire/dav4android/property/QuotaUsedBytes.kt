@@ -17,19 +17,19 @@ import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-data class GetContentLength(
-        val contentLength: Long
+data class QuotaUsedBytes(
+        val quotaUsedBytes: Long
 ) : Property {
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "getcontentlength")
+        val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "quota-used-bytes")
 
         class Factory : PropertyFactory {
             override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): GetContentLength? {
+            override fun create(parser: XmlPullParser): QuotaUsedBytes? {
                 XmlUtils.readText(parser)?.let {
-                    return GetContentLength(it.toLong())
+                    return QuotaUsedBytes(it.toLong())
                 }
                 return null
             }
