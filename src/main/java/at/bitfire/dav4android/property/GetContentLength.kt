@@ -4,6 +4,7 @@ import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
+import kotlin.jvm.JvmField
 
 data class GetContentLength(
         val contentLength: Long
