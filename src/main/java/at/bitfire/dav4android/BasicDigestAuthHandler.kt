@@ -250,7 +250,7 @@ class BasicDigestAuthHandler(
     }
 
     private enum class Protection(
-        val qop: String
+            val qop: String
     ) {    // quality of protection:
         Auth("auth"),              // authentication only
         AuthInt("auth-int");       // authentication with integrity protection
@@ -291,5 +291,4 @@ class BasicDigestAuthHandler(
         }
         return chain.proceed(request)
     }
-
 }
