@@ -15,15 +15,14 @@ open class HttpException: DavException {
 
     var code: Int
 
-    constructor(response: Response): super(
+    constructor(response: Response) : super(
             "HTTP ${response.code()} ${response.message()}",
             httpResponse = response
     ) {
         code = response.code()
     }
 
-    constructor(code: Int, message: String?): super("HTTP $code $message") {
+    constructor(code: Int, message: String?) : super("HTTP $code $message") {
         this.code = code
     }
-
 }

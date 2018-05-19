@@ -31,6 +31,7 @@ class DavCalendar @JvmOverloads constructor(
         }
     }
 
+
     /**
      * Sends a calendar-query REPORT to the resource.
      *

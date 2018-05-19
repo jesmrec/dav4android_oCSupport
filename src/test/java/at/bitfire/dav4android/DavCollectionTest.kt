@@ -222,5 +222,4 @@ class DavCollectionTest {
             assertEquals(1, e.errors.size)
         }
     }
-
 }
