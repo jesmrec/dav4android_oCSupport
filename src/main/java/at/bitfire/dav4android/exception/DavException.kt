@@ -41,7 +41,7 @@ open class DavException @JvmOverloads constructor(
 
         fun isPlainText(type: MediaType) =
                 type.type() == "text" ||
-                (type.type() == "application" && type.subtype() in arrayOf("html", "xml"))
+                        (type.type() == "application" && type.subtype() in arrayOf("html", "xml"))
 
     }
 
@@ -136,5 +136,4 @@ open class DavException @JvmOverloads constructor(
         } else
             response = null
     }
-
 }

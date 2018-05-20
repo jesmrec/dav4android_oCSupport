@@ -6,13 +6,14 @@
 
 package at.bitfire.dav4android
 
+import at.bitfire.dav4android.exception.HttpException
 import at.bitfire.dav4android.property.GetETag
+import at.bitfire.dav4android.property.SyncToken
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
@@ -24,7 +25,6 @@ class DavCollectionTest {
     private val mockServer = MockWebServer()
     private fun sampleUrl() = mockServer.url("/dav/")
 
-
     @Before
     fun startServer() = mockServer.start()
 
@@ -32,8 +32,14 @@ class DavCollectionTest {
     fun stopServer() = mockServer.shutdown()
 
 
-<<<<<<< HEAD
-=======
+    /**
+     * Test sample response for an initial sync-collection report from RFC 6578 3.8.
+     */
+    @Test
+    fun testInitialSyncCollectionReport() {
+        val url = sampleUrl()
+        val collection = DavCollection(httpClient, url)
+
         mockServer.enqueue(MockResponse()
                 .setResponseCode(207)
                 .setHeader("Content-Type", "text/xml; charset=\"utf-8\"")
@@ -87,33 +93,38 @@ class DavCollectionTest {
                         "     <D:sync-token>http://example.com/ns/sync/1234</D:sync-token>\n" +
                         "   </D:multistatus>")
         )
-        collection.reportChanges(null, false, null, GetETag.NAME).use { changes ->
-            assertEquals(3, changes.members.size)
-            val members = changes.members.iterator()
-            val member1 = members.next()
-            assertEquals(sampleUrl().newBuilder().addPathSegment("test.doc").build(), member1.url)
-            assertEquals("00001-abcd1", member1[GetETag::class.java]!!.eTag)
-
-            val member2 = members.next()
-            assertEquals(sampleUrl().newBuilder().addPathSegment("vcard.vcf").build(), member2.url)
-            assertEquals("00002-abcd1", member2[GetETag::class.java]!!.eTag)
-
-            val member3 = members.next()
-            assertEquals(sampleUrl().newBuilder().addPathSegment("calendar.ics").build(), member3.url)
-            assertEquals("00003-abcd1", member3[GetETag::class.java]!!.eTag)
-
-            assertEquals(0, changes.removedMembers.size)
-            assertFalse(changes.furtherResults)
-            assertEquals("http://example.com/ns/sync/1234", changes.syncToken!!.token)
+        var nrCalled = 0
+        val result = collection.reportChanges(null, false, null, GetETag.NAME) { response, relation ->
+            when (response.href) {
+                url.resolve("/dav/test.doc") -> {
+                    assertTrue(response.isSuccess())
+                    assertEquals(Response.HrefRelation.MEMBER, relation)
+                    assertEquals("00001-abcd1", response[GetETag::class.java]?.eTag)
+                    nrCalled++
+                }
+                url.resolve("/dav/vcard.vcf") -> {
+                    assertTrue(response.isSuccess())
+                    assertEquals(Response.HrefRelation.MEMBER, relation)
+                    assertEquals("00002-abcd1", response[GetETag::class.java]?.eTag)
+                    nrCalled++
+                }
+                url.resolve("/dav/calendar.ics") -> {
+                    assertTrue(response.isSuccess())
+                    assertEquals(Response.HrefRelation.MEMBER, relation)
+                    assertEquals("00003-abcd1", response[GetETag::class.java]?.eTag)
+                    nrCalled++
+                }
+            }
         }
+        assertEquals(3, nrCalled)
+        assertEquals("http://example.com/ns/sync/1234", result.filterIsInstance(SyncToken::class.java).first().token)
     }
 
     /**
      * Test sample response for an initial sync-collection report with truncation from RFC 6578 3.10.
      */
->>>>>>> Make WebDAV multistatus response objects immutable
     @Test
-    fun testSyncCollectionReport() {
+    fun testInitialSyncCollectionReportWithTruncation() {
         val url = sampleUrl()
         val collection = DavCollection(httpClient, url)
 
@@ -152,28 +163,39 @@ class DavCollectionTest {
                         "     <D:sync-token>http://example.com/ns/sync/1233</D:sync-token>\n" +
                         "   </D:multistatus>")
         )
-        collection.reportChanges(null, false, null, GetETag.NAME).use { changes ->
-            assertEquals(2, changes.members.size)
-            val members = changes.members.iterator()
-            val member1 = members.next()
-            assertEquals(sampleUrl().newBuilder().addPathSegment("test.doc").build(), member1.url)
-            assertEquals("00001-abcd1", member1[GetETag::class.java]!!.eTag)
-
-            val member2 = members.next()
-            assertEquals(sampleUrl().newBuilder().addPathSegment("vcard.vcf").build(), member2.url)
-            assertEquals("00002-abcd1", member2[GetETag::class.java]!!.eTag)
-
-            assertEquals(1, changes.removedMembers.size)
-            val removedMember = changes.removedMembers.first()
-            assertEquals(sampleUrl().newBuilder().addPathSegment("removed.txt").build(), removedMember.url)
-
-            assertTrue(changes.furtherResults)
-            assertEquals("http://example.com/ns/sync/1233", changes.syncToken!!.token)
+        var nrCalled = 0
+        val result = collection.reportChanges(null, false, null, GetETag.NAME) { response, relation ->
+            when (response.href) {
+                url.resolve("/dav/test.doc") -> {
+                    assertTrue(response.isSuccess())
+                    assertEquals(Response.HrefRelation.MEMBER, relation)
+                    assertEquals("00001-abcd1", response[GetETag::class.java]?.eTag)
+                    nrCalled++
+                }
+                url.resolve("/dav/vcard.vcf") -> {
+                    assertTrue(response.isSuccess())
+                    assertEquals(Response.HrefRelation.MEMBER, relation)
+                    assertEquals("00002-abcd1", response[GetETag::class.java]?.eTag)
+                    nrCalled++
+                }
+                url.resolve("/dav/removed.txt") -> {
+                    assertFalse(response.isSuccess())
+                    assertEquals(404, response.status?.code)
+                    assertEquals(Response.HrefRelation.MEMBER, relation)
+                    nrCalled++
+                }
+                url.resolve("/dav/") -> {
+                    assertFalse(response.isSuccess())
+                    assertEquals(507, response.status?.code)
+                    assertEquals(Response.HrefRelation.SELF, relation)
+                    nrCalled++
+                }
+            }
         }
+        assertEquals("http://example.com/ns/sync/1233", result.filterIsInstance(SyncToken::class.java).first().token)
+        assertEquals(4, nrCalled)
     }
 
-<<<<<<< HEAD
-=======
     /**
      * Test sample response for a sync-collection report with unsupported limit from RFC 6578 3.12.
      */
@@ -192,12 +214,12 @@ class DavCollectionTest {
         )
 
         try {
-            collection.reportChanges("http://example.com/ns/sync/1232", false, 100, GetETag.NAME).close()
+            collection.reportChanges("http://example.com/ns/sync/1232", false, 100, GetETag.NAME) { _, _ ->  }
             fail("Expected HttpException")
         } catch (e: HttpException) {
-            assertEquals(507, e.status)
+            assertEquals(507, e.code)
+            assertTrue(e.errors.any { it.name == Property.Name(XmlUtils.NS_WEBDAV, "number-of-matches-within-limits") })
+            assertEquals(1, e.errors.size)
         }
     }
-
->>>>>>> Refactor API, especially DavResponse
 }
