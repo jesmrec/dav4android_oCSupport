@@ -17,10 +17,6 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
 
 class DavExceptionTest {
 
@@ -47,7 +43,7 @@ class DavExceptionTest {
         val dav = DavResource(httpClient, url)
 
         val builder = StringBuilder()
-        builder.append(CharArray(DavException.MAX_EXCERPT_SIZE-1) { '*' })
+        builder.append(CharArray(DavException.MAX_EXCERPT_SIZE-1, { '*' }))
         builder.append("\u03C0")    // Pi
         val body = builder.toString()
 
@@ -56,7 +52,7 @@ class DavExceptionTest {
                 .setHeader("Content-Type", "text/html")
                 .setBody(body))
         try {
-            dav.propfind(0, ResourceType.NAME) { _, _ -> }
+            dav.propfind(0, ResourceType.NAME).close()
             fail("Expected HttpException")
         } catch (e: HttpException) {
             assertEquals(e.code, 404)
@@ -78,34 +74,12 @@ class DavExceptionTest {
                 .setHeader("Content-Type", "application/octet-stream")
                 .setBody("12345"))
         try {
-            dav.propfind(0, ResourceType.NAME) { _, _ -> }
+            dav.propfind(0, ResourceType.NAME).close()
             fail("Expected HttpException")
         } catch (e: HttpException) {
             assertEquals(e.code, 403)
             assertTrue(e.errors.isEmpty())
             assertNull(e.responseBody)
-        }
-    }
-
-    fun testSerialization() {
-        val url = sampleUrl()
-        val dav = DavResource(httpClient, url)
-
-        mockServer.enqueue(MockResponse()
-                .setResponseCode(500)
-                .setBody("12345"))
-        try {
-            dav.propfind(0, ResourceType.NAME) { _, _ -> }
-            fail("Expected DavException")
-        } catch (e: DavException) {
-            val baos = ByteArrayOutputStream()
-            val oos = ObjectOutputStream(baos)
-            oos.writeObject(e)
-
-            val ois = ObjectInputStream(ByteArrayInputStream(baos.toByteArray()))
-            val e2 = ois.readObject() as HttpException
-            assertEquals(500, e2.code)
-            assertTrue(e2.responseBody!!.contains("12345"))
         }
     }
 
@@ -128,11 +102,11 @@ class DavExceptionTest {
                 .setHeader("Content-Type", "application/xml; charset=\"utf-8\"")
                 .setBody(body))
         try {
-            dav.propfind(0, ResourceType.NAME) { _, _ -> }
+            dav.propfind(0, ResourceType.NAME).close()
             fail("Expected HttpException")
         } catch (e: HttpException) {
             assertEquals(e.code, 423)
-            assertTrue(e.errors.any { it.name == Property.Name(XmlUtils.NS_WEBDAV, "lock-token-submitted") })
+            assertTrue(e.errors.contains(Property.Name(XmlUtils.NS_WEBDAV, "lock-token-submitted")))
             assertEquals(body, e.responseBody)
         }
     }
