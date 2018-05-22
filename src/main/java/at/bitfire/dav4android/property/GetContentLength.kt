@@ -22,7 +22,7 @@ data class GetContentLength(
 ) : Property {
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "getcontentlength")
+        val NAME = Property.Name(XmlUtils.NS_WEBDAV, "getcontentlength")
 
         class Factory : PropertyFactory {
             override fun getName() = NAME

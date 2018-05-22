@@ -22,7 +22,7 @@ data class QuotaUsedBytes(
 ) : Property {
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "quota-used-bytes")
+        val NAME = Property.Name(XmlUtils.NS_WEBDAV, "quota-used-bytes")
 
         class Factory : PropertyFactory {
             override fun getName() = NAME
