@@ -23,16 +23,16 @@ data class GetContentLength(
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_WEBDAV, "getcontentlength")
+    }
 
-        class Factory : PropertyFactory {
-            override fun getName() = NAME
+    class Factory : PropertyFactory {
+        override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): GetContentLength? {
-                XmlUtils.readText(parser)?.let {
-                    return GetContentLength(it.toLong())
-                }
-                return null
+        override fun create(parser: XmlPullParser): GetContentLength? {
+            XmlUtils.readText(parser)?.let {
+                return GetContentLength(it.toLong())
             }
+            return null
         }
     }
 }

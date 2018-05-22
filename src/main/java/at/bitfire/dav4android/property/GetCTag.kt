@@ -22,7 +22,6 @@ data class GetCTag(
         val NAME = Property.Name(XmlUtils.NS_CALENDARSERVER, "getctag")
     }
 
-
     class Factory : PropertyFactory {
 
         override fun getName() = NAME

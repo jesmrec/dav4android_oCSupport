@@ -592,7 +592,6 @@ open class DavResource @JvmOverloads constructor(
         fun parseMultiStatus() {
             // <!ELEMENT multistatus (response*, responsedescription?)  >
             val depth = parser.depth
-
             var eventType = parser.eventType
             while (!(eventType == XmlPullParser.END_TAG && parser.depth == depth)) {
                 if (eventType == XmlPullParser.START_TAG && parser.depth == depth + 1 && parser.namespace == XmlUtils.NS_WEBDAV)
