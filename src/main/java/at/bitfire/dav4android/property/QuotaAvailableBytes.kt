@@ -23,16 +23,16 @@ data class QuotaAvailableBytes(
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_WEBDAV, "quota-available-bytes")
+    }
 
-        class Factory : PropertyFactory {
-            override fun getName() = NAME
+    class Factory : PropertyFactory {
+        override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): QuotaAvailableBytes? {
-                XmlUtils.readText(parser)?.let {
-                    return QuotaAvailableBytes(it.toLong())
-                }
-                return null
+        override fun create(parser: XmlPullParser): QuotaAvailableBytes? {
+            XmlUtils.readText(parser)?.let {
+                return QuotaAvailableBytes(it.toLong())
             }
+            return null
         }
     }
 }

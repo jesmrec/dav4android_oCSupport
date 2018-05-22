@@ -17,6 +17,7 @@ import java.io.IOException
 import java.io.Reader
 import java.io.StringWriter
 import java.net.HttpURLConnection
+import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
 /**
@@ -32,7 +33,7 @@ import java.util.logging.Logger
  * @param log           will be used for logging
  */
 open class DavResource @JvmOverloads constructor(
-        val httpClient: OkHttpClient,
+        var httpClient: OkHttpClient,
         location: HttpUrl,
         val log: Logger = Constants.log
 ) {
@@ -46,7 +47,19 @@ open class DavResource @JvmOverloads constructor(
      * URL of this resource (changes when being redirected by server)
      */
     var location: HttpUrl
-        private set             // allow internal modification only (for redirects)
+        protected set             // allow internal modification only (for redirects)
+
+    /** for the owncloud app redirects must be disabled so the app itself can handle them **/
+    var followRedirects = true
+
+    /** http response code and message needed by ownCloud error handling */
+    var response:Response? = null
+
+    /** Folowing redirects has to be optional for ownCloud since redirects have to be handled in the app*/
+    var followRedirectsEnabled = false
+
+    /** okhttp call needed to cancel it when needed */
+    var call:Call? = null
 
     init {
         // Don't follow redirects (only useful for GET/POST).
@@ -75,29 +88,60 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class)
     fun options(callback: (davCapabilities: Set<String>, response: Response) -> Unit) {
-        httpClient.newCall(Request.Builder()
+        val call = httpClient.newCall(Request.Builder()
                 .method("OPTIONS", null)
                 .header("Content-Length", "0")
                 .url(location)
-                .build()).execute().use { response ->
+                .build())
+
+        this.call = call
+        call.execute().use { response ->
             checkStatus(response)
             callback(HttpUtils.listHeader(response, "DAV").map { it.trim() }.toSet(), response)
         }
     }
 
     @Throws(IOException::class, HttpException::class, DavException::class)
-    fun move(destination:String, forceOverride:Boolean) {
+    fun move(destination:String, forceOverride:Boolean, callback: (response: Response) -> Unit) {
         val requestBuilder = Request.Builder()
                 .method("MOVE", null)
                 .header("Content-Length", "0")
                 .header("Destination", destination);
         if(forceOverride)
             requestBuilder.header("Overwrite", "F")
-        requestBuilder.url(location)
 
-        val response = httpClient.newCall(requestBuilder.build()).execute();
+        followRedirects {
+            requestBuilder.url(location)
+            val call = httpClient.newCall(requestBuilder.build())
+            this.call = call
+            call.execute()
+        }.use{ response ->
+            this.response = response
+            checkStatus(response)
+            callback(response)
+        }
+    }
 
-        checkStatus(response, true)
+    @Throws(IOException::class, HttpException::class, DavException::class)
+    fun copy(destination:String, forceOverride:Boolean, callback: (response: Response) -> Unit) {
+        val requestBuilder = Request.Builder()
+                .method("COPY", null)
+                .header("Content-Length", "0")
+                .header("Destination", destination)
+        if(forceOverride)
+            requestBuilder.header("Overwrite", "F")
+
+        followRedirects {
+            requestBuilder.url(location)
+            val call = httpClient.newCall(requestBuilder.build())
+
+            this.call = call
+            call.execute()
+        }.use{ response ->
+            this.response = response
+            checkStatus(response)
+            callback(response)
+        }
     }
 
 
@@ -112,10 +156,12 @@ open class DavResource @JvmOverloads constructor(
         val rqBody = if (xmlBody != null) RequestBody.create(MIME_XML, xmlBody) else null
 
         followRedirects {
-            httpClient.newCall(Request.Builder()
+            val call = httpClient.newCall(Request.Builder()
                     .method("MKCOL", rqBody)
                     .url(location)
-                    .build()).execute()
+                    .build())
+            this.call = call
+            call.execute()
         }.use { response ->
             checkStatus(response)
             callback(response)
@@ -137,12 +183,14 @@ open class DavResource @JvmOverloads constructor(
     @Throws(IOException::class, HttpException::class)
     fun get(accept: String, callback: (response: Response) -> Unit) {
         followRedirects {
-            httpClient.newCall(Request.Builder()
+            val call = httpClient.newCall(Request.Builder()
                     .get()
                     .url(location)
                     .header("Accept", accept)
                     .header("Accept-Encoding", "identity")    // disable compression because it can change the ETag
-                    .build()).execute()
+                    .build())
+            this.call = call
+            call.execute()
         }.use { response ->
             checkStatus(response)
             callback(response)
@@ -170,13 +218,15 @@ open class DavResource @JvmOverloads constructor(
                     .url(location)
 
             if (ifMatchETag != null)
-                // only overwrite specific version
-                builder.header("If-Match", QuotedStringUtils.asQuotedString(ifMatchETag))
+            // only overwrite specific version
+                builder.header(IF_MATCH_HEADER, QuotedStringUtils.asQuotedString(ifMatchETag))
             if (ifNoneMatch)
-                // don't overwrite anything existing
+            // don't overwrite anything existing
                 builder.header("If-None-Match", "*")
+            val call = httpClient.newCall(builder.build())
 
-            httpClient.newCall(builder.build()).execute()
+            this.call = call
+            call.execute()
         }.use { response ->
             checkStatus(response)
             callback(response)
@@ -204,17 +254,17 @@ open class DavResource @JvmOverloads constructor(
                     .url(location)
             if (ifMatchETag != null)
                 builder.header("If-Match", QuotedStringUtils.asQuotedString(ifMatchETag))
+            val call = httpClient.newCall(builder.build())
 
-            httpClient.newCall(builder.build()).execute()
+            this.call = call
+            call.execute()
         }.use { response ->
             checkStatus(response)
-
             if (response.code() == 207)
             /* If an error occurs deleting a member resource (a resource other than
                the resource identified in the Request-URI), then the response can be
                a 207 (Multi-Status). […] (RFC 4918 9.6.1. DELETE for Collections) */
                 throw HttpException(response)
-
             callback(response)
         }
     }
@@ -233,7 +283,11 @@ open class DavResource @JvmOverloads constructor(
      * @throws DavException on WebDAV error (like no 207 Multi-Status response)
      */
     @Throws(IOException::class, HttpException::class, DavException::class)
-    fun propfind(depth: Int, vararg reqProp: Property.Name, callback: DavResponseCallback) {
+    fun propfind(depth: Int,
+                 vararg reqProp:
+                 Property.Name,
+                 callback: DavResponseCallback,
+                 rawCallback: (response: Response) -> Unit) {
         // build XML request body
         val serializer = XmlUtils.newSerializer()
         val writer = StringWriter()
@@ -245,23 +299,25 @@ open class DavResource @JvmOverloads constructor(
         serializer.setPrefix("OC", XmlUtils.NS_OWNCLOUD)
         serializer.startDocument("UTF-8", null)
         serializer.startTag(XmlUtils.NS_WEBDAV, "propfind")
-            serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
-                for (prop in reqProp) {
-                    serializer.startTag(prop.namespace, prop.name)
-                    serializer.endTag(prop.namespace, prop.name)
-                }
-            serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
+        serializer.startTag(XmlUtils.NS_WEBDAV, "prop")
+        for (prop in reqProp) {
+            serializer.startTag(prop.namespace, prop.name)
+            serializer.endTag(prop.namespace, prop.name)
+        }
+        serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
         serializer.endTag(XmlUtils.NS_WEBDAV, "propfind")
         serializer.endDocument()
-
         followRedirects {
-            httpClient.newCall(Request.Builder()
+            val call = httpClient.newCall(Request.Builder()
                     .url(location)
                     .method("PROPFIND", RequestBody.create(MIME_XML, writer.toString()))
                     .header("Depth", if (depth >= 0) depth.toString() else "infinity")
-                    .build()).execute()
-        }.use {
-            processMultiStatus(it, callback)
+                    .build())
+            this.call = call
+            call.execute()
+        }.use {response->
+            rawCallback(response)
+            processMultiStatus(response, callback)
         }
     }
 
@@ -273,7 +329,7 @@ open class DavResource @JvmOverloads constructor(
      *
      * @throws HttpException in case of an HTTP error
      */
-    private fun checkStatus(response: Response) =
+    protected fun checkStatus(response: Response) =
             checkStatus(response.code(), response.message(), response)
 
     /**
@@ -281,9 +337,9 @@ open class DavResource @JvmOverloads constructor(
      *
      * @throws HttpException (with XML error names, if available) in case of an HTTP error
      */
-    private fun checkStatus(code: Int, message: String?, response: Response?) {
-        if (code / 100 == 2)
-            // everything OK
+    protected fun checkStatus(code: Int, message: String?, response: Response?) {
+        if (code/100 == 2)
+        // everything OK
             return
 
         throw when (code) {
@@ -297,6 +353,10 @@ open class DavResource @JvmOverloads constructor(
                 if (response != null) PreconditionFailedException(response) else PreconditionFailedException(message)
             HttpURLConnection.HTTP_UNAVAILABLE ->
                 if (response != null) ServiceUnavailableException(response) else ServiceUnavailableException(message)
+            HttpURLConnection.HTTP_MOVED_PERM ->
+                if (response != null) RedirectException(response) else RedirectException(code, message)
+            HttpURLConnection.HTTP_MOVED_TEMP ->
+                if (response != null) RedirectException(response) else RedirectException(code, message)
             else ->
                 if (response != null) HttpException(response) else HttpException(code, message)
         }
@@ -318,8 +378,11 @@ open class DavResource @JvmOverloads constructor(
                 response.use {
                     val target = it.header("Location")?.let { location.resolve(it) }
                     if (target != null) {
-                        log.fine("Redirected, new location = $target")
-                        location = target
+                        if(followRedirectsEnabled) {
+                            log.fine("Redirected, new location = $target")
+                            location = target
+                        } else
+                            throw RedirectException(response)
                     } else
                         throw DavException("Redirected without new Location")
                 }
@@ -432,4 +495,36 @@ open class DavResource @JvmOverloads constructor(
         }
     }
 
+    // Connection parameters
+    fun setReadTimeout(readTimeout: Long , timeUnit: TimeUnit) {
+        httpClient = httpClient?.newBuilder()
+                .readTimeout(readTimeout, timeUnit)
+                .build();
+    }
+
+    fun setConnectionTimeout(connectionTimeout: Long , timeUnit: TimeUnit) {
+        httpClient = httpClient?.newBuilder()
+                .connectTimeout(connectionTimeout, timeUnit)
+                .build()
+    }
+
+    fun setRetryOnConnectionFailure(retryOnConnectionFailure: Boolean) {
+        httpClient = httpClient?.newBuilder()
+                .retryOnConnectionFailure(retryOnConnectionFailure)
+                .build()
+    }
+
+    fun isRetryOnConnectionFailure() : Boolean {
+        return httpClient?.retryOnConnectionFailure();
+    }
+
+    fun cancelCall()  {
+        // we need to disable further redirects in order to prevent respawning call
+        followRedirectsEnabled = false
+        call?.cancel()
+    }
+
+    fun isCallAborted() : Boolean {
+        return call?.isCanceled == true
+    }
 }

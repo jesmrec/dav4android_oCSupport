@@ -24,15 +24,16 @@ data class QuotaUsedBytes(
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_WEBDAV, "quota-used-bytes")
 
-        class Factory : PropertyFactory {
-            override fun getName() = NAME
+    }
 
-            override fun create(parser: XmlPullParser): QuotaUsedBytes? {
-                XmlUtils.readText(parser)?.let {
-                    return QuotaUsedBytes(it.toLong())
-                }
-                return null
+    class Factory : PropertyFactory {
+        override fun getName() = NAME
+
+        override fun create(parser: XmlPullParser): QuotaUsedBytes? {
+            XmlUtils.readText(parser)?.let {
+                return QuotaUsedBytes(it.toLong())
             }
+            return null
         }
     }
 }

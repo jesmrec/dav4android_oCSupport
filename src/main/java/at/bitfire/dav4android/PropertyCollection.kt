@@ -108,5 +108,4 @@ class PropertyCollection {
             s.add("$name = $value")
         return "[${s.joinToString(", ")}]"
     }
-
 }
