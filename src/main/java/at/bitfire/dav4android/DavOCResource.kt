@@ -16,7 +16,6 @@ class DavOCResource(
      * @param body              new resource body to upload
      * @param ifMatchETag       value of "If-Match" header to set, or null to omit
      * @param ifNoneMatch       indicates whether "If-None-Match: *" ("don't overwrite anything existing") header shall be sent
-     * @param userAgent         TODO
      * @param contentType       TODO
      * @param ocTotalLength     TODO
      * @param ocXOcMtimeHeader  TODO
@@ -28,7 +27,6 @@ class DavOCResource(
     fun put(body: RequestBody,
                  ifMatchETag: String?,
                  ifNoneMatch: Boolean,
-                 userAgent: String?,
                  contentType: String?,
                  ocTotalLength: String?,
                  ocXOcMtimeHeader: String?
@@ -46,9 +44,6 @@ class DavOCResource(
             if (ifNoneMatch)
             // don't overwrite anything existing
                 builder.header(IF_NONE_MATCH_HEADER, "*")
-            if (userAgent != null) {
-                builder.header(USER_AGENT_HEADER, userAgent)
-            }
             if(contentType != null) {
                 builder.header(CONTENT_TYPE_HEADER, contentType)
             }
