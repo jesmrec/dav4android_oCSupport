@@ -214,10 +214,10 @@ open class DavResource @JvmOverloads constructor(
 
             if (ifMatchETag != null)
                 // only overwrite specific version
-                builder.header("If-Match", QuotedStringUtils.asQuotedString(ifMatchETag))
+                builder.header(IF_MATCH_HEADER, QuotedStringUtils.asQuotedString(ifMatchETag))
             if (ifNoneMatch)
                 // don't overwrite anything existing
-                builder.header("If-None-Match", "*")
+                builder.header(IF_NONE_MATCH_HEADER, "*")
 
             val request = builder.build()
             response = httpClient.newCall(request).execute()
