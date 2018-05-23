@@ -2,14 +2,18 @@ package at.bitfire.dav4android
 
 import at.bitfire.dav4android.exception.DavException
 import at.bitfire.dav4android.exception.HttpException
-import at.bitfire.dav4android.property.GetETag
-import okhttp3.*
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.Response
+import okhttp3.OkHttpClient
+import okhttp3.HttpUrl
 import java.io.IOException
-import java.net.SocketException
+import java.util.logging.Logger
 
 class DavOCResource(
         httpClient: OkHttpClient,
-        location: HttpUrl) : DavResource(httpClient, location) {
+        location: HttpUrl,
+        log: Logger) : DavResource(httpClient, location, log) {
 
     /**
      * Sends a PUT request to the resource.
@@ -26,57 +30,38 @@ class DavOCResource(
     @Throws(IOException::class, HttpException::class)
     fun put(body: RequestBody,
             ifMatchETag: String?,
-            ifNoneMatch: Boolean,
             contentType: String?,
             ocTotalLength: String?,
-            ocXOcMtimeHeader: String?
-    ): Boolean {
-        var redirected = false
-        var response: Response? = null
-        for (attempt in 1..MAX_REDIRECTS) {
-            val builder = Request.Builder()
-                    .put(body)
-                    .url(location)
-
-            if (ifMatchETag != null)
-            // only overwrite specific version
-                builder.header(IF_MATCH_HEADER, QuotedStringUtils.asQuotedString(ifMatchETag))
-            if (ifNoneMatch)
-            // don't overwrite anything existing
-                builder.header(IF_NONE_MATCH_HEADER, "*")
-            if(contentType != null) {
-                builder.header(CONTENT_TYPE_HEADER, contentType)
-            }
-            if (ocTotalLength != null) {
-                builder.header(OC_TOTAL_LENGTH_HEADER, ocTotalLength)
-            }
-            if (ocXOcMtimeHeader != null) {
-                builder.header(OC_X_OC_MTIME_HEADER, ocXOcMtimeHeader)
-            }
-
-            val request = builder.build()
-            val call = httpClient.newCall(request)
-            this.call = call
-            response = call.execute()
-
-            this.request = request
-            this.response = response
-            if (response.isRedirect) {
-                processRedirect(response)
-                redirected = true
-            } else
-                break
+            ocXOcMtimeHeader: String?,
+            callback: (respnse: Response) -> Unit
+    ) {
+        val requestBuilder = Request.Builder()
+                .put(body)
+        if (ifMatchETag != null)
+        // only overwrite specific version
+            requestBuilder.header(IF_MATCH_HEADER, QuotedStringUtils.asQuotedString(ifMatchETag))
+        if(contentType != null) {
+            requestBuilder.header(CONTENT_TYPE_HEADER, contentType)
+        }
+        if (ocTotalLength != null) {
+            requestBuilder.header(OC_TOTAL_LENGTH_HEADER, ocTotalLength)
+        }
+        if (ocXOcMtimeHeader != null) {
+            requestBuilder.header(OC_X_OC_MTIME_HEADER, ocXOcMtimeHeader)
         }
 
-        checkStatus(response!!, true)
+        followRedirects {
+            requestBuilder
+                    .url(location)
+            val call = httpClient.newCall(requestBuilder.build())
 
-        val eTag = response.header("ETag")
-        if (eTag.isNullOrEmpty())
-            properties -= GetETag.NAME
-        else
-            properties[GetETag.NAME] = GetETag(eTag)
-
-        return redirected
+            this.call = call
+            call.execute()
+        }.use {response ->
+            this.response = response
+            checkStatus(response)
+            callback(response)
+        }
     }
 
     /**
@@ -88,11 +73,13 @@ class DavOCResource(
     fun move(destination:String,
              forceOverride:Boolean,
              ocTotalLength: String?,
-             ocXOcMtimeHeader: String?) {
+             ocXOcMtimeHeader: String?,
+             callback: (respnse: Response) -> Unit) {
         val requestBuilder = Request.Builder()
                 .method("MOVE", null)
                 .header("Content-Length", "0")
-                .header("Destination", destination);
+                .header("Destination", destination)
+
 
         if(forceOverride)
             requestBuilder.header("Overwrite", "F")
@@ -101,15 +88,15 @@ class DavOCResource(
         if(ocXOcMtimeHeader != null)
             requestBuilder.header(OC_X_OC_MTIME_HEADER, ocXOcMtimeHeader)
 
-        requestBuilder.url(location)
-
-        val request = requestBuilder.build()
-        val call = httpClient.newCall(request)
-        this.call = call
-        val response = call.execute()
-
-        checkStatus(response, true)
-        this.request = request
-        this.response = response
+        followRedirects {
+            requestBuilder.url(location)
+            val call = httpClient.newCall(requestBuilder.build())
+            this.call = call
+            call.execute()
+        }.use { response->
+            checkStatus(response)
+            this.response = response
+            callback(response)
+        }
     }
 }
