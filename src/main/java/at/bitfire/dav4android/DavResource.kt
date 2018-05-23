@@ -59,6 +59,10 @@ open class DavResource @JvmOverloads constructor(
     /** resources which have been found in the answer, although they aren't members of this resource */
     val related = mutableSetOf<DavResource>()
 
+    /** http response code and message needed by ownCloud error handling */
+    var request:Request? = null
+    var response:Response? = null
+
     init {
         // Don't follow redirects (only useful for GET/POST).
         // This means we have to handle 30x responses manually.
@@ -85,12 +89,16 @@ open class DavResource @JvmOverloads constructor(
     fun options() {
         capabilities.clear()
 
-        val response = httpClient.newCall(Request.Builder()
+        val request = Request.Builder()
                 .method("OPTIONS", null)
                 .header("Content-Length", "0")
                 .url(location)
-                .build()).execute()
+                .build()
+        val response = httpClient.newCall(request).execute()
         checkStatus(response, true)
+
+        this.response = response
+        this.request = request
 
         HttpUtils.listHeader(response, "DAV").mapTo(capabilities) { it.trim() }
     }
@@ -105,9 +113,12 @@ open class DavResource @JvmOverloads constructor(
             requestBuilder.header("Overwrite", "F")
         requestBuilder.url(location)
 
-        val response = httpClient.newCall(requestBuilder.build()).execute();
+        val request = requestBuilder.build()
+        val response = httpClient.newCall(request).execute();
 
         checkStatus(response, true)
+        this.request = request
+        this.response = response
     }
 
 
@@ -123,16 +134,19 @@ open class DavResource @JvmOverloads constructor(
 
         var response: Response? = null
         for (attempt in 1..MAX_REDIRECTS) {
-            response = httpClient.newCall(Request.Builder()
+            val request = Request.Builder()
                     .method("MKCOL", rqBody)
                     .url(location)
-                    .build()).execute()
+                    .build()
+            this.request = request
+            response = httpClient.newCall(request).execute()
             if (response.isRedirect)
                 processRedirect(response)
             else
                 break
         }
         checkStatus(response!!, true)
+        this.response = response
     }
 
     /**
@@ -148,12 +162,16 @@ open class DavResource @JvmOverloads constructor(
     fun get(accept: String): ResponseBody {
         var response: Response? = null
         for (attempt in 1..MAX_REDIRECTS) {
-            response = httpClient.newCall(Request.Builder()
+            val request = Request.Builder()
                     .get()
                     .url(location)
                     .header("Accept", accept)
                     .header("Accept-Encoding", "identity")    // disable compression because it can change the ETag
-                    .build()).execute()
+                    .build()
+            response = httpClient.newCall(request).execute()
+
+            this.response = response
+            this.request = request
             if (response.isRedirect)
                 processRedirect(response)
             else
@@ -201,13 +219,17 @@ open class DavResource @JvmOverloads constructor(
                 // don't overwrite anything existing
                 builder.header("If-None-Match", "*")
 
-            response = httpClient.newCall(builder.build()).execute()
+            val request = builder.build()
+            response = httpClient.newCall(request).execute()
+            this.request = request
+            this.response = response
             if (response.isRedirect) {
                 processRedirect(response)
                 redirected = true
             } else
                 break
         }
+
         checkStatus(response!!, true)
 
         val eTag = response.header("ETag")
@@ -235,7 +257,10 @@ open class DavResource @JvmOverloads constructor(
             if (ifMatchETag != null)
                 builder.header("If-Match", QuotedStringUtils.asQuotedString(ifMatchETag))
 
-            response = httpClient.newCall(builder.build()).execute()
+            val request = builder.build()
+            response = httpClient.newCall(request).execute()
+            this.request = request
+            this.response = response
             if (response.isRedirect)
                 processRedirect(response)
             else
@@ -287,11 +312,15 @@ open class DavResource @JvmOverloads constructor(
 
         var response: Response? = null
         for (attempt in 1..MAX_REDIRECTS) {
-            response = httpClient.newCall(Request.Builder()
+            val request = Request.Builder()
                     .url(location)
                     .method("PROPFIND", RequestBody.create(MIME_XML, writer.toString()))
                     .header("Depth", depth.toString())
-                    .build()).execute()
+                    .build()
+            response = httpClient.newCall(request).execute()
+            this.request = request
+            this.response = response
+
             if (response.isRedirect)
                 processRedirect(response)
             else
@@ -340,6 +369,7 @@ open class DavResource @JvmOverloads constructor(
      * @throws HttpException in case of an HTTP error
      */
     protected fun checkStatus(code: Int, message: String?, response: Response?) {
+
         if (code/100 == 2)
             // everything OK
             return
