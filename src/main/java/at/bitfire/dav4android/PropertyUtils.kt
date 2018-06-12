@@ -35,4 +35,11 @@ object PropertyUtils {
                 OCPrivatelink.NAME
         );
     }
+
+    fun getQuotaPropset(): Array<Property.Name>{
+        return arrayOf(
+                QuotaUsedBytes.NAME,
+                QuotaAvailableBytes.NAME
+        )
+    }
 }
