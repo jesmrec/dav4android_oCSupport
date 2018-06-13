@@ -114,7 +114,25 @@ open class DavResource @JvmOverloads constructor(
         requestBuilder.url(location)
 
         val request = requestBuilder.build()
-        val response = httpClient.newCall(request).execute();
+        val response = httpClient.newCall(request).execute()
+
+        checkStatus(response, true)
+        this.request = request
+        this.response = response
+    }
+
+    @Throws(IOException::class, HttpException::class, DavException::class)
+    fun copy(destination:String, forceOverride:Boolean) {
+        val requestBuilder = Request.Builder()
+                .method("COPY", null)
+                .header("Content-Length", "0")
+                .header("Destination", destination);
+        if(forceOverride)
+            requestBuilder.header("Overwrite", "F")
+        requestBuilder.url(location)
+
+        val request = requestBuilder.build()
+        val response = httpClient.newCall(request).execute()
 
         checkStatus(response, true)
         this.request = request
