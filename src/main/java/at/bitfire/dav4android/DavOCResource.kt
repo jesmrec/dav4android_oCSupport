@@ -4,6 +4,7 @@ import at.bitfire.dav4android.exception.HttpException
 import at.bitfire.dav4android.property.GetETag
 import okhttp3.*
 import java.io.IOException
+import java.net.SocketException
 
 class DavOCResource(
         httpClient: OkHttpClient,
@@ -54,9 +55,9 @@ class DavOCResource(
 
             val request = builder.build()
             val call = httpClient.newCall(request)
+            this.call = call
             response = call.execute()
 
-            this.call = call
             this.request = request
             this.response = response
             if (response.isRedirect) {

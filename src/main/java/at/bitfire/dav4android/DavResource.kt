@@ -98,11 +98,10 @@ open class DavResource @JvmOverloads constructor(
                 .url(location)
                 .build()
         val call = httpClient.newCall(request)
+        this.call = call
         val response = call.execute()
 
         checkStatus(response, true)
-
-        this.call = call
         this.response = response
         this.request = request
 
@@ -121,11 +120,10 @@ open class DavResource @JvmOverloads constructor(
 
         val request = requestBuilder.build()
         val call = httpClient.newCall(request)
+        this.call = call
         val response = call.execute()
 
         checkStatus(response, true)
-
-        this.call = call
         this.request = request
         this.response = response
     }
@@ -142,11 +140,10 @@ open class DavResource @JvmOverloads constructor(
 
         val request = requestBuilder.build()
         val call = httpClient.newCall(request)
+        this.call = call
         val response = call.execute()
 
         checkStatus(response, true)
-
-        this.call = call
         this.request = request
         this.response = response
     }
@@ -171,8 +168,8 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             val call = httpClient.newCall(request)
             this.call = call
-
             response = call.execute()
+
             if (response.isRedirect)
                 processRedirect(response)
             else
@@ -202,9 +199,9 @@ open class DavResource @JvmOverloads constructor(
                     .header("Accept-Encoding", "identity")    // disable compression because it can change the ETag
                     .build()
             val call = httpClient.newCall(request)
+            this.call = call
             response = call.execute()
 
-            this.call = call
             this.response = response
             this.request = request
 
@@ -257,9 +254,9 @@ open class DavResource @JvmOverloads constructor(
 
             val request = builder.build()
             val call = httpClient.newCall(request)
+            this.call = call
             response = call.execute()
 
-            this.call = call
             this.request = request
             this.response = response
 
@@ -299,9 +296,9 @@ open class DavResource @JvmOverloads constructor(
 
             val request = builder.build()
             val call = httpClient.newCall(request)
+            this.call = call
             response = call.execute()
 
-            this.call = call
             this.request = request
             this.response = response
 
@@ -363,9 +360,9 @@ open class DavResource @JvmOverloads constructor(
                     .build()
 
             val call = httpClient.newCall(request)
+            this.call = call
             response = call.execute()
 
-            this.call = call
             this.request = request
             this.response = response
 
@@ -757,5 +754,9 @@ open class DavResource @JvmOverloads constructor(
 
     fun cancelCall()  {
         this.call?.cancel()
+    }
+
+    fun isCallAborted() : Boolean {
+        return this.call?.isCanceled == true
     }
 }
