@@ -63,6 +63,9 @@ open class DavResource @JvmOverloads constructor(
     var request:Request? = null
     var response:Response? = null
 
+    /** okhttp call needed to cancel it when needed */
+    var call:Call? = null
+
     init {
         // Don't follow redirects (only useful for GET/POST).
         // This means we have to handle 30x responses manually.
@@ -94,9 +97,12 @@ open class DavResource @JvmOverloads constructor(
                 .header("Content-Length", "0")
                 .url(location)
                 .build()
-        val response = httpClient.newCall(request).execute()
+        val call = httpClient.newCall(request)
+        val response = call.execute()
+
         checkStatus(response, true)
 
+        this.call = call
         this.response = response
         this.request = request
 
@@ -114,9 +120,12 @@ open class DavResource @JvmOverloads constructor(
         requestBuilder.url(location)
 
         val request = requestBuilder.build()
-        val response = httpClient.newCall(request).execute()
+        val call = httpClient.newCall(request)
+        val response = call.execute()
 
         checkStatus(response, true)
+
+        this.call = call
         this.request = request
         this.response = response
     }
@@ -132,9 +141,12 @@ open class DavResource @JvmOverloads constructor(
         requestBuilder.url(location)
 
         val request = requestBuilder.build()
-        val response = httpClient.newCall(request).execute()
+        val call = httpClient.newCall(request)
+        val response = call.execute()
 
         checkStatus(response, true)
+
+        this.call = call
         this.request = request
         this.response = response
     }
@@ -157,7 +169,10 @@ open class DavResource @JvmOverloads constructor(
                     .url(location)
                     .build()
             this.request = request
-            response = httpClient.newCall(request).execute()
+            val call = httpClient.newCall(request)
+            this.call = call
+
+            response = call.execute()
             if (response.isRedirect)
                 processRedirect(response)
             else
@@ -186,10 +201,13 @@ open class DavResource @JvmOverloads constructor(
                     .header("Accept", accept)
                     .header("Accept-Encoding", "identity")    // disable compression because it can change the ETag
                     .build()
-            response = httpClient.newCall(request).execute()
+            val call = httpClient.newCall(request)
+            response = call.execute()
 
+            this.call = call
             this.response = response
             this.request = request
+
             if (response.isRedirect)
                 processRedirect(response)
             else
@@ -238,9 +256,13 @@ open class DavResource @JvmOverloads constructor(
                 builder.header(IF_NONE_MATCH_HEADER, "*")
 
             val request = builder.build()
-            response = httpClient.newCall(request).execute()
+            val call = httpClient.newCall(request)
+            response = call.execute()
+
+            this.call = call
             this.request = request
             this.response = response
+
             if (response.isRedirect) {
                 processRedirect(response)
                 redirected = true
@@ -276,9 +298,13 @@ open class DavResource @JvmOverloads constructor(
                 builder.header("If-Match", QuotedStringUtils.asQuotedString(ifMatchETag))
 
             val request = builder.build()
-            response = httpClient.newCall(request).execute()
+            val call = httpClient.newCall(request)
+            response = call.execute()
+
+            this.call = call
             this.request = request
             this.response = response
+
             if (response.isRedirect)
                 processRedirect(response)
             else
@@ -335,7 +361,11 @@ open class DavResource @JvmOverloads constructor(
                     .method("PROPFIND", RequestBody.create(MIME_XML, writer.toString()))
                     .header("Depth", depth.toString())
                     .build()
-            response = httpClient.newCall(request).execute()
+
+            val call = httpClient.newCall(request)
+            response = call.execute()
+
+            this.call = call
             this.request = request
             this.response = response
 
@@ -725,4 +755,7 @@ open class DavResource @JvmOverloads constructor(
         related.clear()
     }
 
+    fun cancelCall()  {
+        this.call?.cancel()
+    }
 }

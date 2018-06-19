@@ -53,7 +53,10 @@ class DavOCResource(
             }
 
             val request = builder.build()
-            response = httpClient.newCall(request).execute()
+            val call = httpClient.newCall(request)
+            response = call.execute()
+
+            this.call = call
             this.request = request
             this.response = response
             if (response.isRedirect) {
