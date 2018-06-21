@@ -33,7 +33,7 @@ import java.util.logging.Logger
  * @param log           [Logger] which will be used for logging, or null for default
  */
 open class DavResource @JvmOverloads constructor(
-        val httpClient: OkHttpClient,
+        var httpClient: OkHttpClient,
         var location: HttpUrl,
         val log: Logger = Constants.log
 ) {
@@ -752,11 +752,22 @@ open class DavResource @JvmOverloads constructor(
         related.clear()
     }
 
+    // Connection parameters
+    fun setRetryOnConnectionFailure(retryOnConnectionFailure: Boolean) {
+        httpClient = httpClient?.newBuilder()
+                .retryOnConnectionFailure(retryOnConnectionFailure)
+                .build();
+    }
+
+    fun isRetryOnConnectionFailure() : Boolean {
+        return httpClient?.retryOnConnectionFailure();
+    }
+
     fun cancelCall()  {
-        this.call?.cancel()
+        call?.cancel()
     }
 
     fun isCallAborted() : Boolean {
-        return this.call?.isCanceled == true
+        return call?.isCanceled == true
     }
 }
