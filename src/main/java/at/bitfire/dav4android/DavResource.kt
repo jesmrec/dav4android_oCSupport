@@ -23,6 +23,7 @@ import java.io.StringWriter
 import java.net.HttpURLConnection
 import java.net.ProtocolException
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -753,6 +754,24 @@ open class DavResource @JvmOverloads constructor(
     }
 
     // Connection parameters
+    fun setReadTimeout(readTimeout: Long , timeUnit: TimeUnit) {
+        httpClient = httpClient?.newBuilder()
+                .readTimeout(readTimeout, timeUnit)
+                .build();
+    }
+
+    fun setConnectionTimeout(connectionTimeout: Long , timeUnit: TimeUnit) {
+        httpClient = httpClient?.newBuilder()
+                .connectTimeout(connectionTimeout, timeUnit)
+                .build();
+    }
+
+    fun setFollowRedirects(followRedirects: Boolean) {
+        httpClient = httpClient?.newBuilder()
+                .followRedirects(followRedirects)
+                .build();
+    }
+
     fun setRetryOnConnectionFailure(retryOnConnectionFailure: Boolean) {
         httpClient = httpClient?.newBuilder()
                 .retryOnConnectionFailure(retryOnConnectionFailure)
