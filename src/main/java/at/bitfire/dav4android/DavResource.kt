@@ -60,6 +60,9 @@ open class DavResource @JvmOverloads constructor(
     /** resources which have been found in the answer, although they aren't members of this resource */
     val related = mutableSetOf<DavResource>()
 
+    /** for the owncloud app redirects must be disabled so the app itself can handle them **/
+    var followRedirects = true
+
     /** http response code and message needed by ownCloud error handling */
     var request:Request? = null
     var response:Response? = null
@@ -171,7 +174,7 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             response = call.execute()
 
-            if (response.isRedirect)
+            if (followRedirects && response.isRedirect)
                 processRedirect(response)
             else
                 break
@@ -206,7 +209,7 @@ open class DavResource @JvmOverloads constructor(
             this.response = response
             this.request = request
 
-            if (response.isRedirect)
+            if (followRedirects && response.isRedirect)
                 processRedirect(response)
             else
                 break
@@ -261,7 +264,7 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (response.isRedirect) {
+            if (followRedirects && response.isRedirect) {
                 processRedirect(response)
                 redirected = true
             } else
@@ -303,7 +306,7 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (response.isRedirect)
+            if (followRedirects && response.isRedirect)
                 processRedirect(response)
             else
                 break
@@ -367,7 +370,7 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (response.isRedirect)
+            if (followRedirects && response.isRedirect)
                 processRedirect(response)
             else
                 break
@@ -763,19 +766,13 @@ open class DavResource @JvmOverloads constructor(
     fun setConnectionTimeout(connectionTimeout: Long , timeUnit: TimeUnit) {
         httpClient = httpClient?.newBuilder()
                 .connectTimeout(connectionTimeout, timeUnit)
-                .build();
-    }
-
-    fun setFollowRedirects(followRedirects: Boolean) {
-        httpClient = httpClient?.newBuilder()
-                .followRedirects(followRedirects)
-                .build();
+                .build()
     }
 
     fun setRetryOnConnectionFailure(retryOnConnectionFailure: Boolean) {
         httpClient = httpClient?.newBuilder()
                 .retryOnConnectionFailure(retryOnConnectionFailure)
-                .build();
+                .build()
     }
 
     fun isRetryOnConnectionFailure() : Boolean {
