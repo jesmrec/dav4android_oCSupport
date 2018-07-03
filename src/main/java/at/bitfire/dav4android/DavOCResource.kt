@@ -1,5 +1,6 @@
 package at.bitfire.dav4android
 
+import at.bitfire.dav4android.exception.DavException
 import at.bitfire.dav4android.exception.HttpException
 import at.bitfire.dav4android.property.GetETag
 import okhttp3.*
@@ -15,9 +16,9 @@ class DavOCResource(
      * @param body              new resource body to upload
      * @param ifMatchETag       value of "If-Match" header to set, or null to omit
      * @param ifNoneMatch       indicates whether "If-None-Match: *" ("don't overwrite anything existing") header shall be sent
-     * @param contentType       TODO
-     * @param ocTotalLength     TODO
-     * @param ocXOcMtimeHeader  TODO
+     * @param contentType
+     * @param ocTotalLength     total length of resource body
+     * @param ocXOcMtimeHeader  modification time
      * @return                  true if the request was redirected successfully, i.e. #{@link #location} and maybe resource name may have changed
      * @throws IOException on I/O error
      * @throws HttpException on HTTP error
@@ -76,5 +77,39 @@ class DavOCResource(
             properties[GetETag.NAME] = GetETag(eTag)
 
         return redirected
+    }
+
+    /**
+     * Sends a MOVE request to the resource
+     * @param ocTotalLength     total length of resource body
+     * @param ocXOcMtimeHeader  modification time
+     */
+    @Throws(IOException::class, HttpException::class, DavException::class)
+    fun move(destination:String,
+             forceOverride:Boolean,
+             ocTotalLength: String?,
+             ocXOcMtimeHeader: String?) {
+        val requestBuilder = Request.Builder()
+                .method("MOVE", null)
+                .header("Content-Length", "0")
+                .header("Destination", destination);
+
+        if(forceOverride)
+            requestBuilder.header("Overwrite", "F")
+        if(ocTotalLength != null)
+            requestBuilder.header(OC_TOTAL_LENGTH_HEADER, ocTotalLength)
+        if(ocXOcMtimeHeader != null)
+            requestBuilder.header(OC_X_OC_MTIME_HEADER, ocXOcMtimeHeader)
+
+        requestBuilder.url(location)
+
+        val request = requestBuilder.build()
+        val call = httpClient.newCall(request)
+        this.call = call
+        val response = call.execute()
+
+        checkStatus(response, true)
+        this.request = request
+        this.response = response
     }
 }
