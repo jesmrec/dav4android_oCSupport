@@ -174,9 +174,12 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             response = call.execute()
 
-            if (followRedirects && response.isRedirect)
-                processRedirect(response)
-            else
+            if (followRedirects && response.isRedirect) {
+                if (followRedirects)
+                    processRedirect(response)
+                else
+                    throw RedirectException(response)
+            } else
                 break
         }
         checkStatus(response!!, true)
@@ -209,9 +212,12 @@ open class DavResource @JvmOverloads constructor(
             this.response = response
             this.request = request
 
-            if (followRedirects && response.isRedirect)
-                processRedirect(response)
-            else
+            if (followRedirects && response.isRedirect) {
+                if (followRedirects)
+                    processRedirect(response)
+                else
+                    throw RedirectException(response)
+            } else
                 break
         }
         checkStatus(response!!, false)
@@ -265,8 +271,10 @@ open class DavResource @JvmOverloads constructor(
             this.response = response
 
             if (followRedirects && response.isRedirect) {
-                processRedirect(response)
-                redirected = true
+                if (followRedirects)
+                    processRedirect(response)
+                else
+                    throw RedirectException(response)
             } else
                 break
         }
@@ -306,9 +314,12 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (followRedirects && response.isRedirect)
-                processRedirect(response)
-            else
+            if (followRedirects && response.isRedirect) {
+                if (followRedirects)
+                    processRedirect(response)
+                else
+                    throw RedirectException(response)
+            } else
                 break
         }
 
@@ -370,10 +381,14 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (followRedirects && response.isRedirect)
-                processRedirect(response)
-            else
+            if (followRedirects && response.isRedirect) {
+                if (followRedirects)
+                    processRedirect(response)
+                else
+                    throw RedirectException(response)
+            } else
                 break
+
         }
 
         checkStatus(response!!, false)
@@ -434,6 +449,10 @@ open class DavResource @JvmOverloads constructor(
                 if (response != null) PreconditionFailedException(response) else PreconditionFailedException(message)
             HttpURLConnection.HTTP_UNAVAILABLE ->
                 if (response != null) ServiceUnavailableException(response) else ServiceUnavailableException(message)
+            HttpURLConnection.HTTP_MOVED_PERM ->
+                if (response != null) RedirectException(response) else RedirectException(message)
+            HttpURLConnection.HTTP_MOVED_TEMP ->
+                if (response != null) RedirectException(response) else RedirectException(message)
             else ->
                 if (response != null) HttpException(response) else HttpException(code, message)
         }
