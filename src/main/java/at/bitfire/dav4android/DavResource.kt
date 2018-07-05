@@ -174,7 +174,7 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             response = call.execute()
 
-            if (followRedirects && response.isRedirect) {
+            if (response.isRedirect) {
                 if (followRedirects)
                     processRedirect(response)
                 else
@@ -212,7 +212,7 @@ open class DavResource @JvmOverloads constructor(
             this.response = response
             this.request = request
 
-            if (followRedirects && response.isRedirect) {
+            if (response.isRedirect) {
                 if (followRedirects)
                     processRedirect(response)
                 else
@@ -270,7 +270,7 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (followRedirects && response.isRedirect) {
+            if (response.isRedirect) {
                 if (followRedirects)
                     processRedirect(response)
                 else
@@ -314,7 +314,7 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (followRedirects && response.isRedirect) {
+            if (response.isRedirect) {
                 if (followRedirects)
                     processRedirect(response)
                 else
@@ -381,7 +381,7 @@ open class DavResource @JvmOverloads constructor(
             this.request = request
             this.response = response
 
-            if (followRedirects && response.isRedirect) {
+            if (response.isRedirect) {
                 if (followRedirects)
                     processRedirect(response)
                 else
