@@ -1,9 +1,5 @@
 buildscript {
-<<<<<<< HEAD
     ext.kotlin_version = '1.2.51'
-=======
-    ext.kotlin_version = '1.2.50'
->>>>>>> Update Kotlin, gradle; move lambda expressions out of parentheses
     ext.dokka_version = '0.9.16'
 
     repositories {
