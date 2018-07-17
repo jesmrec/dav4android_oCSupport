@@ -10,7 +10,7 @@ open class RedirectException: HttpException {
         redirectLocation = redirectResponse.header("location") ?: ""
     }
 
-    constructor(message: String?): super(message) {
+    constructor(code: Int, message: String?): super(code, message) {
         redirectLocation = ""
     }
 }
