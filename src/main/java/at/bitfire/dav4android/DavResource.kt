@@ -320,7 +320,7 @@ open class DavResource @JvmOverloads constructor(
             processMultiStatus(response, callback)
         }
     }
-
+ 
 
     // status handling
 

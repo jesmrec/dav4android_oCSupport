@@ -6,9 +6,18 @@
 
 package at.bitfire.dav4android
 
+import at.bitfire.dav4android.property.*
+import at.bitfire.dav4android.property.address.AddressData
+import at.bitfire.dav4android.property.address.AddressbookDescription
+import at.bitfire.dav4android.property.address.AddressbookHomeSet
+import at.bitfire.dav4android.property.address.SupportedAddressData
+import at.bitfire.dav4android.property.calendar.*
+import at.bitfire.dav4android.property.owncloud.OCId
+import at.bitfire.dav4android.property.owncloud.OCPermissions
+import at.bitfire.dav4android.property.owncloud.OCPrivatelink
+import at.bitfire.dav4android.property.owncloud.OCSize
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
-import java.util.*
 import java.util.logging.Level
 
 object PropertyRegistry {
@@ -17,16 +26,49 @@ object PropertyRegistry {
 
     init {
         Constants.log.info("Registering DAV property factories")
-        for (factory in ServiceLoader.load(PropertyFactory::class.java)) {
+        for (factory in getPropertyFactories()) {
             Constants.log.fine("Registering ${factory::class.java.name} for ${factory.getName()}")
             register(factory)
         }
     }
 
-
     private fun register(factory: PropertyFactory) {
         factories[factory.getName()] = factory
     }
+
+    private fun getPropertyFactories() =
+            arrayOf(
+                    AddressbookDescription.Factory(),
+                    AddressbookHomeSet.Factory(),
+                    AddressData.Factory(),
+                    CalendarColor.Factory(),
+                    CalendarData.Factory(),
+                    CalendarDescription.Factory(),
+                    CalendarHomeSet.Factory(),
+                    CalendarProxyReadFor.Factory(),
+                    CalendarProxyWriteFor.Factory(),
+                    CalendarTimezone.Factory(),
+                    CalendarUserAddressSet.Factory(),
+                    CreationDate.Factory(),
+                    CurrentUserPrincipal.Factory(),
+                    CurrentUserPrivilegeSet.Factory(),
+                    DisplayName.Factory(),
+                    GetContentLength.Factory(),
+                    GetContentType.Factory(),
+                    GetCTag.Factory(),
+                    GetLastModified.Factory(),
+                    GroupMembership.Factory(),
+                    QuotaAvailableBytes.Factory(),
+                    QuotaUsedBytes.Factory(),
+                    Source.Factory(),
+                    SupportedAddressData.Factory(),
+                    SupportedCalendarComponentSet.Factory(),
+                    SupportedReportSet.Factory(),
+                    SyncToken.Factory(),
+                    OCPermissions.Factory(),
+                    OCId.Factory(),
+                    OCSize.Factory(),
+                    OCPrivatelink.Factory())
 
     fun create(name: Property.Name, parser: XmlPullParser) =
             try {
@@ -35,5 +77,4 @@ object PropertyRegistry {
                 Constants.log.log(Level.WARNING, "Couldn't parse $name", e)
                 null
             }
-
 }

@@ -11,16 +11,16 @@ data class OCPermissions(
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "permissions")
+    }
 
-        class Factory : PropertyFactory {
-            override fun getName() = NAME
+    class Factory : PropertyFactory {
+        override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): OCPermissions? {
-                XmlUtils.readText(parser)?.let {
-                    return OCPermissions(it)
-                }
-                return null
+        override fun create(parser: XmlPullParser): OCPermissions? {
+            XmlUtils.readText(parser)?.let {
+                return OCPermissions(it)
             }
+            return null
         }
     }
 }

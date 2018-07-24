@@ -11,16 +11,16 @@ data class OCPrivatelink(
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "privatelink")
+    }
 
-        class Factory : PropertyFactory {
-            override fun getName() = NAME
+    class Factory : PropertyFactory {
+        override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): OCPrivatelink? {
-                XmlUtils.readText(parser)?.let {
-                    return OCPrivatelink(it)
-                }
-                return null
+        override fun create(parser: XmlPullParser): OCPrivatelink? {
+            XmlUtils.readText(parser)?.let {
+                return OCPrivatelink(it)
             }
+            return null
         }
     }
 }

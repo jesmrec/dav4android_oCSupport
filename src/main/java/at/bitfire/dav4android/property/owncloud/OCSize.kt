@@ -11,16 +11,16 @@ data class OCSize(
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "size")
+    }
 
-        class Factory : PropertyFactory {
-            override fun getName() = NAME
+    class Factory : PropertyFactory {
+        override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): OCSize? {
-                XmlUtils.readText(parser)?.let {
-                    return OCSize(it.toLong())
-                }
-                return null
+        override fun create(parser: XmlPullParser): OCSize? {
+            XmlUtils.readText(parser)?.let {
+                return OCSize(it.toLong())
             }
+            return null
         }
     }
 }

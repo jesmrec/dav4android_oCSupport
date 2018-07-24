@@ -11,16 +11,16 @@ data class OCId(
     companion object {
         @JvmField
         val NAME = Property.Name(XmlUtils.NS_OWNCLOUD, "id")
+    }
 
-        class Factory : PropertyFactory {
-            override fun getName() = NAME
+    class Factory : PropertyFactory {
+        override fun getName() = NAME
 
-            override fun create(parser: XmlPullParser): OCId? {
-                XmlUtils.readText(parser)?.let {
-                    return OCId(it)
-                }
-                return null
+        override fun create(parser: XmlPullParser): OCId? {
+            XmlUtils.readText(parser)?.let {
+                return OCId(it)
             }
+            return null
         }
     }
 }
