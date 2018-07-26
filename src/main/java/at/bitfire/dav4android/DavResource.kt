@@ -49,16 +49,11 @@ open class DavResource @JvmOverloads constructor(
     var location: HttpUrl
         protected set             // allow internal modification only (for redirects)
 
-    /** for the owncloud app redirects must be disabled so the app itself can handle them **/
-    var followRedirects = true
+    var followRedirections = false
 
-    /** http response code and message needed by ownCloud error handling */
-    var response:Response? = null
-
-    /** Folowing redirects has to be optional for ownCloud since redirects have to be handled in the app*/
-    var followRedirectsEnabled = false
-
-    /** okhttp call needed to cancel it when needed */
+    /**
+     * For canceling OkHttp call when needed
+     */
     var call:Call? = null
 
     init {
@@ -96,8 +91,8 @@ open class DavResource @JvmOverloads constructor(
 
         this.call = call
         call.execute().use { response ->
-            checkStatus(response)
             callback(HttpUtils.listHeader(response, "DAV").map { it.trim() }.toSet(), response)
+            checkStatus(response)
         }
     }
 
@@ -116,9 +111,8 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             call.execute()
         }.use{ response ->
-            this.response = response
-            checkStatus(response)
             callback(response)
+            checkStatus(response)
         }
     }
 
@@ -138,9 +132,8 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             call.execute()
         }.use{ response ->
-            this.response = response
-            checkStatus(response)
             callback(response)
+            checkStatus(response)
         }
     }
 
@@ -163,8 +156,8 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             call.execute()
         }.use { response ->
-            checkStatus(response)
             callback(response)
+            checkStatus(response)
         }
     }
 
@@ -192,8 +185,8 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             call.execute()
         }.use { response ->
-            checkStatus(response)
             callback(response)
+            checkStatus(response)
         }
     }
 
@@ -228,8 +221,8 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             call.execute()
         }.use { response ->
-            checkStatus(response)
             callback(response)
+            checkStatus(response)
         }
     }
 
@@ -259,13 +252,13 @@ open class DavResource @JvmOverloads constructor(
             this.call = call
             call.execute()
         }.use { response ->
+            callback(response)
             checkStatus(response)
             if (response.code() == 207)
             /* If an error occurs deleting a member resource (a resource other than
                the resource identified in the Request-URI), then the response can be
                a 207 (Multi-Status). […] (RFC 4918 9.6.1. DELETE for Collections) */
                 throw HttpException(response)
-            callback(response)
         }
     }
 
@@ -378,7 +371,7 @@ open class DavResource @JvmOverloads constructor(
                 response.use {
                     val target = it.header("Location")?.let { location.resolve(it) }
                     if (target != null) {
-                        if(followRedirectsEnabled) {
+                        if(followRedirections) {
                             log.fine("Redirected, new location = $target")
                             location = target
                         } else
@@ -520,7 +513,7 @@ open class DavResource @JvmOverloads constructor(
 
     fun cancelCall()  {
         // we need to disable further redirects in order to prevent respawning call
-        followRedirectsEnabled = false
+        followRedirections = false
         call?.cancel()
     }
 

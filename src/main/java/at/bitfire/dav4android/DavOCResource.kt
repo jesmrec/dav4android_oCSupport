@@ -2,11 +2,8 @@ package at.bitfire.dav4android
 
 import at.bitfire.dav4android.exception.DavException
 import at.bitfire.dav4android.exception.HttpException
-import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.*
 import okhttp3.Response
-import okhttp3.OkHttpClient
-import okhttp3.HttpUrl
 import java.io.IOException
 import java.util.logging.Logger
 
@@ -33,7 +30,7 @@ class DavOCResource(
             contentType: String?,
             ocTotalLength: String?,
             ocXOcMtimeHeader: String?,
-            callback: (respnse: Response) -> Unit
+            callback: (response: Response) -> Unit
     ) {
         val requestBuilder = Request.Builder()
                 .put(body)
@@ -58,9 +55,8 @@ class DavOCResource(
             this.call = call
             call.execute()
         }.use {response ->
-            this.response = response
-            checkStatus(response)
             callback(response)
+            checkStatus(response)
         }
     }
 
@@ -74,12 +70,12 @@ class DavOCResource(
              forceOverride:Boolean,
              ocTotalLength: String?,
              ocXOcMtimeHeader: String?,
-             callback: (respnse: Response) -> Unit) {
+             callback: (response: Response) -> Unit
+    ) {
         val requestBuilder = Request.Builder()
                 .method("MOVE", null)
                 .header("Content-Length", "0")
                 .header("Destination", destination)
-
 
         if(forceOverride)
             requestBuilder.header("Overwrite", "F")
@@ -94,9 +90,8 @@ class DavOCResource(
             this.call = call
             call.execute()
         }.use { response->
-            checkStatus(response)
-            this.response = response
             callback(response)
+            checkStatus(response)
         }
     }
 }
