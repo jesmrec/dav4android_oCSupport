@@ -56,6 +56,7 @@ object PropertyRegistry {
                     GetContentLength.Factory(),
                     GetContentType.Factory(),
                     GetCTag.Factory(),
+                    GetETag.Factory(),
                     GetLastModified.Factory(),
                     GroupMembership.Factory(),
                     QuotaAvailableBytes.Factory(),
