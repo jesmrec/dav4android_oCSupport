@@ -13,9 +13,6 @@ import at.bitfire.dav4android.property.owncloud.OCId
 import at.bitfire.dav4android.property.owncloud.OCPermissions
 import at.bitfire.dav4android.property.owncloud.OCPrivatelink
 import at.bitfire.dav4android.property.owncloud.OCSize
-import okhttp3.HttpUrl
-import java.net.URI
-import java.net.URISyntaxException
 
 object PropertyUtils {
     fun getAllPropSet(): Array<Property.Name>{
