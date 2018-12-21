@@ -61,7 +61,7 @@ dependencies {
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
 
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
-    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
 
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation 'junit:junit:4.12'
