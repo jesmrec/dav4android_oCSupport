@@ -4,27 +4,30 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package at.bitfire.dav4android.property.calendar
+package at.bitfire.dav4android.property
 
 import at.bitfire.dav4android.Property
+import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
-import at.bitfire.dav4android.property.HrefListProperty
 import org.xmlpull.v1.XmlPullParser
 
-class CalendarProxyReadFor: HrefListProperty() {
+data class CalendarDescription(
+        val description: String?
+): Property {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALENDARSERVER, "calendar-proxy-read-for")
+        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-description")
     }
 
 
-    class Factory : HrefListProperty.Factory() {
+    class Factory: PropertyFactory {
 
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                create(parser, CalendarProxyReadFor())
+                // <!ELEMENT calendar-description (#PCDATA)>
+                CalendarDescription(XmlUtils.readText(parser))
 
     }
 

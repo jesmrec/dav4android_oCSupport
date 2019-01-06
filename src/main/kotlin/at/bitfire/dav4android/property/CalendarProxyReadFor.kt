@@ -4,30 +4,26 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package at.bitfire.dav4android.property.address
+package at.bitfire.dav4android.property
 
 import at.bitfire.dav4android.Property
-import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-data class AddressData(
-        val vCard: String?
-): Property {
+class CalendarProxyReadFor: HrefListProperty() {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "address-data")
+        val NAME = Property.Name(XmlUtils.NS_CALENDARSERVER, "calendar-proxy-read-for")
     }
 
 
-    class Factory: PropertyFactory {
+    class Factory : HrefListProperty.Factory() {
 
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                // <!ELEMENT address-data (#PCDATA)>
-                AddressData(XmlUtils.readText(parser))
+                create(parser, CalendarProxyReadFor())
 
     }
 

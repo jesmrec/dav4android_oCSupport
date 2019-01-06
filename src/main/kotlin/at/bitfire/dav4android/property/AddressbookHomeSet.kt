@@ -4,18 +4,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package at.bitfire.dav4android.property.calendar
+package at.bitfire.dav4android.property
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.XmlUtils
-import at.bitfire.dav4android.property.HrefListProperty
 import org.xmlpull.v1.XmlPullParser
 
-class CalendarHomeSet: HrefListProperty() {
+class AddressbookHomeSet: HrefListProperty() {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-home-set")
+        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "addressbook-home-set")
     }
 
 
@@ -24,7 +23,7 @@ class CalendarHomeSet: HrefListProperty() {
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                create(parser, CalendarHomeSet())
+                create(parser, AddressbookHomeSet())
 
     }
 

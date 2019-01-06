@@ -4,20 +4,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package at.bitfire.dav4android.property.calendar
+package at.bitfire.dav4android.property
 
 import at.bitfire.dav4android.Property
 import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
 import org.xmlpull.v1.XmlPullParser
 
-data class CalendarDescription(
-        val description: String?
+data class AddressData(
+        val vCard: String?
 ): Property {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-description")
+        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "address-data")
     }
 
 
@@ -26,8 +26,8 @@ data class CalendarDescription(
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                // <!ELEMENT calendar-description (#PCDATA)>
-                CalendarDescription(XmlUtils.readText(parser))
+                // <!ELEMENT address-data (#PCDATA)>
+                AddressData(XmlUtils.readText(parser))
 
     }
 

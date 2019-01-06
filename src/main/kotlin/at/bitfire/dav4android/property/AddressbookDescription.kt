@@ -4,27 +4,29 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package at.bitfire.dav4android.property.calendar
+package at.bitfire.dav4android.property
 
 import at.bitfire.dav4android.Property
+import at.bitfire.dav4android.PropertyFactory
 import at.bitfire.dav4android.XmlUtils
-import at.bitfire.dav4android.property.HrefListProperty
 import org.xmlpull.v1.XmlPullParser
 
-class CalendarUserAddressSet: HrefListProperty() {
+data class AddressbookDescription(
+        var description: String? = null
+): Property {
 
     companion object {
         @JvmField
-        val NAME = Property.Name(XmlUtils.NS_CALDAV, "calendar-user-address-set")
+        val NAME = Property.Name(XmlUtils.NS_CARDDAV, "addressbook-description")
     }
 
-
-    class Factory : HrefListProperty.Factory() {
+    class Factory: PropertyFactory {
 
         override fun getName() = NAME
 
         override fun create(parser: XmlPullParser) =
-                create(parser, CalendarUserAddressSet())
+                // <!ELEMENT addressbook-description (#PCDATA)>
+                AddressbookDescription(XmlUtils.readText(parser))
 
     }
 
