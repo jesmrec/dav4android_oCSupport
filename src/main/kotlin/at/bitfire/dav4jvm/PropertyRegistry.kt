@@ -6,16 +6,11 @@
 
 package at.bitfire.dav4jvm
 
-import at.bitfire.dav4android.property.*
-import at.bitfire.dav4android.property.address.AddressData
-import at.bitfire.dav4android.property.address.AddressbookDescription
-import at.bitfire.dav4android.property.address.AddressbookHomeSet
-import at.bitfire.dav4android.property.address.SupportedAddressData
-import at.bitfire.dav4android.property.calendar.*
 import at.bitfire.dav4android.property.owncloud.OCId
 import at.bitfire.dav4android.property.owncloud.OCPermissions
 import at.bitfire.dav4android.property.owncloud.OCPrivatelink
 import at.bitfire.dav4android.property.owncloud.OCSize
+import at.bitfire.dav4jvm.property.*
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.util.logging.Level
