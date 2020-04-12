@@ -8,7 +8,9 @@ package at.bitfire.dav4jvm
 
 import at.bitfire.dav4jvm.exception.DavException
 import at.bitfire.dav4jvm.exception.HttpException
-import okhttp3.*
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.IOException
 import java.io.StringWriter
 import java.text.SimpleDateFormat
@@ -22,8 +24,8 @@ class DavCalendar @JvmOverloads constructor(
 ): DavCollection(httpClient, location, log) {
 
     companion object {
-        val MIME_ICALENDAR = MediaType.parse("text/calendar")
-        val MIME_ICALENDAR_UTF8 = MediaType.parse("text/calendar;charset=utf-8")
+        val MIME_ICALENDAR = "text/calendar".toMediaType()
+        val MIME_ICALENDAR_UTF8 = "text/calendar;charset=utf-8".toMediaType()
 
         private val timeFormatUTC = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.US)
         init {
@@ -92,7 +94,7 @@ class DavCalendar @JvmOverloads constructor(
         followRedirects {
             httpClient.newCall(Request.Builder()
                     .url(location)
-                    .method("REPORT", RequestBody.create(MIME_XML, writer.toString()))
+                    .method("REPORT", writer.toString().toRequestBody(MIME_XML))
                     .header("Depth", "1")
                     .build()).execute()
         }.use {
@@ -145,7 +147,7 @@ class DavCalendar @JvmOverloads constructor(
         followRedirects {
             httpClient.newCall(Request.Builder()
                     .url(location)
-                    .method("REPORT", RequestBody.create(MIME_XML, writer.toString()))
+                    .method("REPORT", writer.toString().toRequestBody(MIME_XML))
                     .build()).execute()
         }.use {
             return processMultiStatus(it, callback)

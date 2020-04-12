@@ -40,7 +40,7 @@ open class DavResource @JvmOverloads constructor(
 
     companion object {
         const val MAX_REDIRECTS = 5
-        val MIME_XML = MediaType.parse("application/xml; charset=utf-8")
+        val MIME_XML = "application/xml; charset=utf-8".toMediaType()
     }
 
     /**
@@ -59,7 +59,8 @@ open class DavResource @JvmOverloads constructor(
     init {
         // Don't follow redirects (only useful for GET/POST).
         // This means we have to handle 30x responses ourselves.
-        require(!httpClient.followRedirects()) { "httpClient must not follow redirects automatically" }
+        require(!httpClient.followRedirects) { "httpClient must not follow redirects " +
+                "automatically" }
 
         this.location = location
     }
@@ -165,7 +166,7 @@ open class DavResource @JvmOverloads constructor(
                     .execute()
         }.use { response ->
             checkStatus(response)
-            if (response.code() == 207)
+            if (response.code == 207)
                 /* Multiple resources were to be affected by the MOVE, but errors on some
                 of them prevented the operation from taking place.
                 [_] (RFC 4918 9.9.4. Status Codes for MOVE Method) */
@@ -207,7 +208,7 @@ open class DavResource @JvmOverloads constructor(
         }.use{ response ->
             checkStatus(response)
 
-            if (response.code() == 207)
+            if (response.code == 207)
             /* Multiple resources were to be affected by the COPY, but errors on some
             of them prevented the operation from taking place.
             [_] (RFC 4918 9.8.5. Status Codes for COPY Method) */
@@ -225,7 +226,7 @@ open class DavResource @JvmOverloads constructor(
      */
     @Throws(IOException::class, HttpException::class)
     fun mkCol(xmlBody: String?, callback: (response: Response) -> Unit) {
-        val rqBody = if (xmlBody != null) RequestBody.create(MIME_XML, xmlBody) else null
+        val rqBody = xmlBody?.toRequestBody(MIME_XML)
 
         followRedirects {
             val call = httpClient.newCall(Request.Builder()
@@ -333,7 +334,7 @@ open class DavResource @JvmOverloads constructor(
         }.use { response ->
             callback(response)
             checkStatus(response)
-            if (response.code() == 207)
+            if (response.code == 207)
             /* If an error occurs deleting a member resource (a resource other than
                the resource identified in the Request-URI), then the response can be
                a 207 (Multi-Status). […] (RFC 4918 9.6.1. DELETE for Collections) */
@@ -382,7 +383,7 @@ open class DavResource @JvmOverloads constructor(
         followRedirects {
             val call = httpClient.newCall(Request.Builder()
                     .url(location)
-                    .method("PROPFIND", RequestBody.create(MIME_XML, writer.toString()))
+                    .method("PROPFIND", writer.toString().toRequestBody(MIME_XML))
                     .header("Depth", if (depth >= 0) depth.toString() else "infinity")
                     .build())
             this.call = call
@@ -474,14 +475,14 @@ open class DavResource @JvmOverloads constructor(
      * @throws DavException if the response is not a Multi-Status response
      */
     private fun assertMultiStatus(response: Response) {
-        if (response.code() != 207)
-            throw DavException("Expected 207 Multi-Status, got ${response.code()} ${response.message()}")
+        if (response.code != 207)
+            throw DavException("Expected 207 Multi-Status, got ${response.code} ${response.message}")
 
-        if (response.body() == null)
+        if (response.body == null)
             throw DavException("Received 207 Multi-Status without body")
 
-        response.body()?.contentType()?.let {
-            if (((it.type() != "application" && it.type() != "text")) || it.subtype() != "xml")
+        response.body?.contentType()?.let {
+            if (((it.type != "application" && it.type != "text")) || it.subtype != "xml")
                 throw DavException("Received non-XML 207 Multi-Status")
         } ?: log.warning("Received 207 Multi-Status without Content-Type, assuming XML")
     }
@@ -505,7 +506,7 @@ open class DavResource @JvmOverloads constructor(
     protected fun processMultiStatus(response: Response, callback: DavResponseCallback): List<Property> {
         checkStatus(response)
         assertMultiStatus(response)
-        response.body()!!.use {
+        response.body!!.use {
             return processMultiStatus(it.charStream(), callback)
         }
     }
