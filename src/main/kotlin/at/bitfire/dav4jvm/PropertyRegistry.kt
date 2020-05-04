@@ -20,14 +20,53 @@ object PropertyRegistry {
     private val factories = mutableMapOf<Property.Name, PropertyFactory>()
 
     init {
-        Constants.log.info("Registering DAV property factories")
-        for (factory in getPropertyFactories()) {
-            Constants.log.fine("Registering ${factory::class.java.name} for ${factory.getName()}")
-            register(factory)
-        }
+        Dav4jvm.log.info("Registering DAV property factories")
+        registerDefaultFactories()
     }
 
-    private fun register(factory: PropertyFactory) {
+    private fun registerDefaultFactories() {
+        register(listOf(
+            AddressbookDescription.Factory(),
+            AddressbookHomeSet.Factory(),
+            AddressData.Factory(),
+            CalendarColor.Factory(),
+            CalendarData.Factory(),
+            CalendarDescription.Factory(),
+            CalendarHomeSet.Factory(),
+            CalendarProxyReadFor.Factory(),
+            CalendarProxyWriteFor.Factory(),
+            CalendarTimezone.Factory(),
+            CalendarUserAddressSet.Factory(),
+            CreationDate.Factory(),
+            CurrentUserPrincipal.Factory(),
+            CurrentUserPrivilegeSet.Factory(),
+            DisplayName.Factory(),
+            GetContentLength.Factory(),
+            GetContentType.Factory(),
+            GetCTag.Factory(),
+            GetETag.Factory(),
+            GetLastModified.Factory(),
+            GroupMembership.Factory(),
+            QuotaAvailableBytes.Factory(),
+            QuotaUsedBytes.Factory(),
+            ResourceType.Factory(),
+            Source.Factory(),
+            SupportedAddressData.Factory(),
+            SupportedCalendarComponentSet.Factory(),
+            SupportedReportSet.Factory(),
+            SyncToken.Factory()
+        ))
+    }
+
+
+    /**
+     * Registers a property factory, so that objects for all WebDAV properties which are handled
+     * by this factory can be created.
+     *
+     * @param factory property factory to be registered
+     */
+    fun register(factory: PropertyFactory) {
+        Dav4jvm.log.fine("Registering ${factory::class.java.name} for ${factory.getName()}")
         factories[factory.getName()] = factory
     }
 
@@ -70,7 +109,7 @@ object PropertyRegistry {
             try {
                 factories[name]?.create(parser)
             } catch (e: XmlPullParserException) {
-                Constants.log.log(Level.WARNING, "Couldn't parse $name", e)
+                Dav4jvm.log.log(Level.WARNING, "Couldn't parse $name", e)
                 null
             }
 }

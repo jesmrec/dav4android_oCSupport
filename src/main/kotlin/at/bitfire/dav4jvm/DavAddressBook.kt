@@ -18,8 +18,8 @@ import java.util.logging.Logger
 class DavAddressBook @JvmOverloads constructor(
         httpClient: OkHttpClient,
         location: HttpUrl,
-        log: Logger = Constants.log
-) : DavCollection(httpClient, location, log) {
+        log: Logger = Dav4jvm.log
+): DavCollection(httpClient, location, log) {
 
     companion object {
         val MIME_VCARD3_UTF8 = "text/vcard;charset=utf-8".toMediaType()
