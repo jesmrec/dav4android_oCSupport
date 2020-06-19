@@ -9,8 +9,10 @@ package at.bitfire.dav4jvm
 import at.bitfire.dav4jvm.exception.DavException
 import at.bitfire.dav4jvm.exception.HttpException
 import okhttp3.HttpUrl
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.io.StringWriter
 import java.text.SimpleDateFormat
@@ -21,13 +23,14 @@ class DavCalendar @JvmOverloads constructor(
         httpClient: OkHttpClient,
         location: HttpUrl,
         log: Logger = Dav4jvm.log
-): DavCollection(httpClient, location, log) {
+) : DavCollection(httpClient, location, log) {
 
     companion object {
         val MIME_ICALENDAR = "text/calendar".toMediaType()
         val MIME_ICALENDAR_UTF8 = "text/calendar;charset=utf-8".toMediaType()
 
         private val timeFormatUTC = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.US)
+
         init {
             timeFormatUTC.timeZone = TimeZone.getTimeZone("UTC")
         }
@@ -138,7 +141,7 @@ class DavCalendar @JvmOverloads constructor(
         serializer.endTag(XmlUtils.NS_WEBDAV, "prop")
         for (url in urls) {
             serializer.startTag(XmlUtils.NS_WEBDAV, "href")
-            serializer.text(url.encodedPath())
+            serializer.text(url.encodedPath)
             serializer.endTag(XmlUtils.NS_WEBDAV, "href")
         }
         serializer.endTag(XmlUtils.NS_CALDAV, "calendar-multiget")

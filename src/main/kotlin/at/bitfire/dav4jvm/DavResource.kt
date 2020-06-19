@@ -10,6 +10,8 @@ import at.bitfire.dav4jvm.exception.*
 import at.bitfire.dav4jvm.property.SyncToken
 import okhttp3.*
 import okhttp3.Response
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import java.io.EOFException
@@ -102,7 +104,7 @@ open class DavResource @JvmOverloads constructor(
         val requestBuilder = Request.Builder()
                 .method("MOVE", null)
                 .header("Content-Length", "0")
-                .header("Destination", destination);
+                .header("Destination", destination)
         if(forceOverride)
             requestBuilder.header("Overwrite", "F")
 
@@ -403,7 +405,7 @@ open class DavResource @JvmOverloads constructor(
      * @throws HttpException in case of an HTTP error
      */
     protected fun checkStatus(response: Response) =
-            checkStatus(response.code(), response.message(), response)
+            checkStatus(response.code, response.message, response)
 
     /**
      * Checks the status from an HTTP response and throws an exception in case of an error.
@@ -572,25 +574,25 @@ open class DavResource @JvmOverloads constructor(
 
     // Connection parameters
     fun setReadTimeout(readTimeout: Long , timeUnit: TimeUnit) {
-        httpClient = httpClient?.newBuilder()
+        httpClient = httpClient.newBuilder()
                 .readTimeout(readTimeout, timeUnit)
-                .build();
+                .build()
     }
 
     fun setConnectionTimeout(connectionTimeout: Long , timeUnit: TimeUnit) {
-        httpClient = httpClient?.newBuilder()
+        httpClient = httpClient.newBuilder()
                 .connectTimeout(connectionTimeout, timeUnit)
                 .build()
     }
 
     fun setRetryOnConnectionFailure(retryOnConnectionFailure: Boolean) {
-        httpClient = httpClient?.newBuilder()
+        httpClient = httpClient.newBuilder()
                 .retryOnConnectionFailure(retryOnConnectionFailure)
                 .build()
     }
 
     fun isRetryOnConnectionFailure() : Boolean {
-        return httpClient?.retryOnConnectionFailure();
+        return httpClient.retryOnConnectionFailure
     }
 
     fun cancelCall()  {
@@ -600,6 +602,6 @@ open class DavResource @JvmOverloads constructor(
     }
 
     fun isCallAborted() : Boolean {
-        return call?.isCanceled == true
+        return call?.isCanceled() == true
     }
 }

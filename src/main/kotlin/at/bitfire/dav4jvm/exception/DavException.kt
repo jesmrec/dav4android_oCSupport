@@ -40,8 +40,8 @@ open class DavException @JvmOverloads constructor(
         const val MAX_EXCERPT_SIZE = 10 * 1024   // don't dump more than 20 kB
 
         fun isPlainText(type: MediaType) =
-                type.type() == "text" ||
-                        (type.type() == "application" && type.subtype() in arrayOf("html", "xml"))
+                type.type == "text" ||
+                        (type.type == "application" && type.subtype in arrayOf("html", "xml"))
 
     }
 

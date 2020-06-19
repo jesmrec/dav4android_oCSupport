@@ -1,8 +1,8 @@
-package at.bitfire.dav4android.exception
+package at.bitfire.dav4jvm.exception
 
 import okhttp3.Response
 
-open class RedirectException: HttpException {
+class RedirectException: HttpException {
 
     val redirectLocation : String
 

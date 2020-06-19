@@ -6,13 +6,9 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
-package at.bitfire.dav4android
+package at.bitfire.dav4jvm
 
-import at.bitfire.dav4android.property.*
-import at.bitfire.dav4android.property.owncloud.OCId
-import at.bitfire.dav4android.property.owncloud.OCPermissions
-import at.bitfire.dav4android.property.owncloud.OCPrivatelink
-import at.bitfire.dav4android.property.owncloud.OCSize
+import at.bitfire.dav4jvm.property.*
 
 object PropertyUtils {
     fun getAllPropSet(): Array<Property.Name>{

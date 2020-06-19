@@ -6,10 +6,6 @@
 
 package at.bitfire.dav4jvm
 
-import at.bitfire.dav4android.property.owncloud.OCId
-import at.bitfire.dav4android.property.owncloud.OCPermissions
-import at.bitfire.dav4android.property.owncloud.OCPrivatelink
-import at.bitfire.dav4android.property.owncloud.OCSize
 import at.bitfire.dav4jvm.property.*
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
@@ -26,35 +22,39 @@ object PropertyRegistry {
 
     private fun registerDefaultFactories() {
         register(listOf(
-            AddressbookDescription.Factory(),
-            AddressbookHomeSet.Factory(),
-            AddressData.Factory(),
-            CalendarColor.Factory(),
-            CalendarData.Factory(),
-            CalendarDescription.Factory(),
-            CalendarHomeSet.Factory(),
-            CalendarProxyReadFor.Factory(),
-            CalendarProxyWriteFor.Factory(),
-            CalendarTimezone.Factory(),
-            CalendarUserAddressSet.Factory(),
-            CreationDate.Factory(),
-            CurrentUserPrincipal.Factory(),
-            CurrentUserPrivilegeSet.Factory(),
-            DisplayName.Factory(),
-            GetContentLength.Factory(),
-            GetContentType.Factory(),
-            GetCTag.Factory(),
-            GetETag.Factory(),
-            GetLastModified.Factory(),
-            GroupMembership.Factory(),
-            QuotaAvailableBytes.Factory(),
-            QuotaUsedBytes.Factory(),
-            ResourceType.Factory(),
-            Source.Factory(),
-            SupportedAddressData.Factory(),
-            SupportedCalendarComponentSet.Factory(),
-            SupportedReportSet.Factory(),
-            SyncToken.Factory()
+                AddressbookDescription.Factory(),
+                AddressbookHomeSet.Factory(),
+                AddressData.Factory(),
+                CalendarColor.Factory(),
+                CalendarData.Factory(),
+                CalendarDescription.Factory(),
+                CalendarHomeSet.Factory(),
+                CalendarProxyReadFor.Factory(),
+                CalendarProxyWriteFor.Factory(),
+                CalendarTimezone.Factory(),
+                CalendarUserAddressSet.Factory(),
+                CreationDate.Factory(),
+                CurrentUserPrincipal.Factory(),
+                CurrentUserPrivilegeSet.Factory(),
+                DisplayName.Factory(),
+                GetContentLength.Factory(),
+                GetContentType.Factory(),
+                GetCTag.Factory(),
+                GetETag.Factory(),
+                GetLastModified.Factory(),
+                GroupMembership.Factory(),
+                QuotaAvailableBytes.Factory(),
+                QuotaUsedBytes.Factory(),
+                ResourceType.Factory(),
+                Source.Factory(),
+                SupportedAddressData.Factory(),
+                SupportedCalendarComponentSet.Factory(),
+                SupportedReportSet.Factory(),
+                SyncToken.Factory(),
+                OCPermissions.Factory(),
+                OCPrivatelink.Factory(),
+                OCSize.Factory(),
+                OCId.Factory()
         ))
     }
 
@@ -104,6 +104,18 @@ object PropertyRegistry {
                     OCId.Factory(),
                     OCSize.Factory(),
                     OCPrivatelink.Factory())
+
+    /**
+     * Registers some property factories, so that objects for all WebDAV properties which are handled
+     * by these factories can be created.
+
+     * @param factories property factories to be registered
+     */
+    fun register(factories: Iterable<PropertyFactory>) {
+        factories.forEach {
+            register(it)
+        }
+    }
 
     fun create(name: Property.Name, parser: XmlPullParser) =
             try {
