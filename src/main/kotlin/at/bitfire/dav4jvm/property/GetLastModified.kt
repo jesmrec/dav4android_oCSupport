@@ -11,7 +11,7 @@ import org.xmlpull.v1.XmlPullParser
 
 data class GetLastModified(
         var lastModified: Long
-): Property {
+) : Property {
 
     companion object {
         @JvmField
@@ -19,7 +19,7 @@ data class GetLastModified(
     }
 
 
-    class Factory: PropertyFactory {
+    class Factory : PropertyFactory {
 
         override fun getName() = NAME
 

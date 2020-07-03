@@ -17,7 +17,7 @@ import java.util.*
 object HttpUtils {
 
     const val httpDateFormatStr = "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
-    val httpDateFormat = SimpleDateFormat(httpDateFormatStr)
+    val httpDateFormat = SimpleDateFormat(httpDateFormatStr, Locale.ENGLISH)
 
     /**
      * Gets the resource name (the last segment of the path) from an URL.
@@ -53,6 +53,7 @@ object HttpUtils {
      * @return date, or null if date could not be parsed
      */
     fun parseDate(dateStr: String) = try {
+        httpDateFormat.parse(dateStr)?.let { return it }
         DateUtils.parseDate(dateStr,
                 httpDateFormatStr,
                 "EEE, dd MMM yyyy HH:mm:ss zzz", // RFC 822, updated by RFC 1123 with any TZ
