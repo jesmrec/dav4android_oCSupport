@@ -12,7 +12,8 @@ import java.util.logging.Logger
 class DavOCResource(
         httpClient: OkHttpClient,
         location: HttpUrl,
-        log: Logger) : DavResource(httpClient, location, log) {
+        log: Logger
+) : DavResource(httpClient, location, log) {
 
     /**
      * Sends a PUT request to the resource.
