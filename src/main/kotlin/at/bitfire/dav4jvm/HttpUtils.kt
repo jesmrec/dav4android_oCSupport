@@ -8,6 +8,7 @@ package at.bitfire.dav4jvm
 
 import okhttp3.HttpUrl
 import okhttp3.Response
+import okhttp3.internal.UTC
 import org.apache.commons.lang3.time.DateUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -16,8 +17,12 @@ import java.util.*
 
 object HttpUtils {
 
+    // Date format specified by RFC 7231 section 7.1.1.1.
     const val httpDateFormatStr = "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
-    val httpDateFormat = SimpleDateFormat(httpDateFormatStr, Locale.ENGLISH)
+    val httpDateFormat = SimpleDateFormat(httpDateFormatStr, Locale.US).apply {
+        timeZone = UTC
+        isLenient = false
+    }
 
     /**
      * Gets the resource name (the last segment of the path) from an URL.
